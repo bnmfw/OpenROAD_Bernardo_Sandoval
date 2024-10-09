@@ -555,8 +555,7 @@ class FlexPA
       std::set<std::vector<int>>& inst_access_patterns,
       std::set<std::pair<int, int>>& used_access_points,
       std::set<std::pair<int, int>>& viol_access_points,
-      int curr_unique_inst_idx,
-      int max_access_point_size);
+      int curr_unique_inst_idx);
 
   void genPatternsPrintDebug(
       std::vector<std::vector<FlexDPNode>>& nodes,
