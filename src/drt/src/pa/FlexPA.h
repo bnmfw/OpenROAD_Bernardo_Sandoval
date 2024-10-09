@@ -565,8 +565,6 @@ class FlexPA
       std::vector<std::vector<FlexDPNode>>& nodes,
       const std::vector<std::pair<frMPin*, frInstTerm*>>& pins);
 
-  int getFlatIdx(int idx_1, int idx_2, int idx_2_dim);
-
   int getFlatEdgeIdx(int prev_idx_1,
                      int prev_idx_2,
                      int curr_idx_2,
@@ -582,21 +580,20 @@ class FlexPA
 
   void genInstRowPattern(std::vector<frInst*>& insts);
 
-  void genInstRowPatternInit(std::vector<FlexDPNode>& nodes,
+  void genInstRowPatternInit(std::vector<std::vector<FlexDPNode>>& nodes,
                              const std::vector<frInst*>& insts);
 
-  void genInstRowPatternPerform(std::vector<FlexDPNode>& nodes,
+  void genInstRowPatternPerform(std::vector<std::vector<FlexDPNode>>& nodes,
                                 const std::vector<frInst*>& insts);
 
-  void genInstRowPattern_commit(std::vector<FlexDPNode>& nodes,
+  void genInstRowPattern_commit(std::vector<std::vector<FlexDPNode>>& nodes,
                                 const std::vector<frInst*>& insts);
 
-  void genInstRowPattern_print(std::vector<FlexDPNode>& nodes,
+  void genInstRowPattern_print(std::vector<std::vector<FlexDPNode>>& nodes,
                                const std::vector<frInst*>& insts);
 
   int getEdgeCost(FlexDPNode* prev_node_idx,
                   FlexDPNode* curr_node_idx,
-                  const std::vector<FlexDPNode>& nodes,
                   const std::vector<frInst*>& insts);
 
   void revertAccessPoints();
