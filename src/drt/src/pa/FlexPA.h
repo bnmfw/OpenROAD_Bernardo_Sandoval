@@ -135,6 +135,8 @@ class FlexPA
   // prep
   void prep();
 
+  bool isStdCell(frInst* inst);
+  bool isMacroCell(frInst* inst);
   /**
    * @brief initializes all access points of all unique instances
    */
@@ -395,24 +397,32 @@ class FlexPA
       frInstTerm* inst_term);
 
   /**
-   * @brief Determines coordinates of an End Point given a Begin Point.
+   * @brief Generates an end_point given an begin_point in the direction
    *
-   * @param end_point the End Point to be filled
-   * @param layer_polys a vector with all the pin polygons
-   * @param begin_point the Begin Point
-   * @param layer_num the number of the layer where begin_point is
-   * @param dir the direction the End Point is from the Begin Point
-   * @param is_block if the instance is a macro block.
+   * @param layer_polys Pin Polygons on the layer (used for a check)
+   * TODO: maybe the check can be moves to isPointOusideShapes, but not sure
+   * @param begin_point The begin reference point
+   * @param layer_num layer where the point is being created
+   * @param dir direction where the point will be created
+   * @param is_block wether the begin_point is from a macro block
    *
-   * @return if any polygon on the layer contains the End Point
+   * @returns the generated end point
    */
-  bool check_endPointIsOutside(
-      Point& end_point,
+  Point genEndPoint(
       const std::vector<gtl::polygon_90_data<frCoord>>& layer_polys,
       const Point& begin_point,
       frLayerNum layer_num,
       frDirEnum dir,
       bool is_block);
+
+  /**
+   * @brief Checks if a point is outside the layer_polygons
+   *
+   * @return if the point is outside the pin shapes
+   */
+  bool isPointOutsideShapes(
+      const Point& point,
+      const std::vector<gtl::polygon_90_data<frCoord>>& layer_polys);
 
   template <typename T>
   void check_addViaAccess(
@@ -511,20 +521,34 @@ class FlexPA
       frAccessPointEnum upper_type);
 
   void prepPattern();
+
   void prepPatternInstRows(std::vector<std::vector<frInst*>> inst_rows);
+
   int prepPatternInst(frInst* inst, int curr_unique_inst_idx, double x_weight);
+
   int genPatterns(const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
                   int curr_unique_inst_idx);
+
+  int genPatterns_helper(
+      const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
+      std::set<std::vector<int>>& inst_access_patterns,
+      std::set<std::pair<int, int>>& used_access_points,
+      std::set<std::pair<int, int>>& viol_access_points,
+      int curr_unique_inst_idx,
+      int max_access_point_size);
+
   void genPatternsInit(std::vector<FlexDPNode>& nodes,
                        const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
                        std::set<std::vector<int>>& inst_access_patterns,
                        std::set<std::pair<int, int>>& used_access_points,
                        std::set<std::pair<int, int>>& viol_access_points,
                        int max_access_point_size);
+
   void genPatterns_reset(
       std::vector<FlexDPNode>& nodes,
       const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
       int max_access_point_size);
+
   void genPatterns_perform(
       std::vector<FlexDPNode>& nodes,
       const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
@@ -533,6 +557,7 @@ class FlexPA
       const std::set<std::pair<int, int>>& viol_access_points,
       int curr_unique_inst_idx,
       int max_access_point_size);
+
   int getEdgeCost(int prev_node_idx,
                   int curr_node_idx,
                   const std::vector<FlexDPNode>& nodes,
@@ -542,6 +567,7 @@ class FlexPA
                   const std::set<std::pair<int, int>>& viol_access_points,
                   int curr_unique_inst_idx,
                   int max_access_point_size);
+
   bool genPatterns_commit(
       const std::vector<FlexDPNode>& nodes,
       const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
@@ -551,16 +577,21 @@ class FlexPA
       std::set<std::pair<int, int>>& viol_access_points,
       int curr_unique_inst_idx,
       int max_access_point_size);
+
   void genPatternsPrintDebug(
       std::vector<FlexDPNode>& nodes,
       const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
       int max_access_point_size);
+
   void genPatterns_print(
       std::vector<FlexDPNode>& nodes,
       const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
       int max_access_point_size);
+
   int getFlatIdx(int idx_1, int idx_2, int idx_2_dim);
+
   void getNestedIdx(int flat_idx, int& idx_1, int& idx_2, int idx_2_dim);
+
   int getFlatEdgeIdx(int prev_idx_1,
                      int prev_idx_2,
                      int curr_idx_2,
@@ -573,20 +604,28 @@ class FlexPA
       std::set<frBlockObject*>* owners = nullptr);
 
   void getInsts(std::vector<frInst*>& insts);
+
   void genInstRowPattern(std::vector<frInst*>& insts);
+
   void genInstRowPatternInit(std::vector<FlexDPNode>& nodes,
                              const std::vector<frInst*>& insts);
+
   void genInstRowPatternPerform(std::vector<FlexDPNode>& nodes,
                                 const std::vector<frInst*>& insts);
+
   void genInstRowPattern_commit(std::vector<FlexDPNode>& nodes,
                                 const std::vector<frInst*>& insts);
+
   void genInstRowPattern_print(std::vector<FlexDPNode>& nodes,
                                const std::vector<frInst*>& insts);
+
   int getEdgeCost(int prev_node_idx,
                   int curr_node_idx,
                   const std::vector<FlexDPNode>& nodes,
                   const std::vector<frInst*>& insts);
+
   void revertAccessPoints();
+
   void addAccessPatternObj(
       frInst* inst,
       FlexPinAccessPattern* access_pattern,
