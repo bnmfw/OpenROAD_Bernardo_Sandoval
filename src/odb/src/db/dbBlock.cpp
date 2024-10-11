@@ -1004,7 +1004,9 @@ dbOStream& operator<<(dbOStream& stream, const _dbBlock& block)
   stream << *block._modinst_tbl;
   if (db->isSchema(db_schema_update_hierarchy)) {
     stream << *block._modbterm_tbl;
-    stream << *block._busport_tbl;
+    if (db->isSchema(db_schema_db_remove_hash)) {
+      stream << *block._busport_tbl;
+    }
     stream << *block._moditerm_tbl;
     stream << *block._modnet_tbl;
   }
@@ -1147,7 +1149,6 @@ dbIStream& operator>>(dbIStream& stream, _dbBlock& block)
   if (db->isSchema(db_schema_db_remove_hash)) {
     stream >> *block._module_tbl;
     stream >> *block._inst_tbl;
-
   } else {
     stream >> *block._inst_tbl;
     stream >> *block._module_tbl;
@@ -1155,7 +1156,9 @@ dbIStream& operator>>(dbIStream& stream, _dbBlock& block)
   stream >> *block._modinst_tbl;
   if (db->isSchema(db_schema_update_hierarchy)) {
     stream >> *block._modbterm_tbl;
-    stream >> *block._busport_tbl;
+    if (db->isSchema(db_schema_db_remove_hash)) {
+      stream >> *block._busport_tbl;
+    }
     stream >> *block._moditerm_tbl;
     stream >> *block._modnet_tbl;
   }
@@ -4111,6 +4114,10 @@ bool dbBlock::designIsRouted(bool verbose)
 {
   bool design_is_routed = true;
   for (dbNet* net : getNets()) {
+    if (net->isSpecial()) {
+      continue;
+    }
+
     const int pin_count = net->getBTermCount() + net->getITerms().size();
 
     odb::uint wire_cnt = 0, via_cnt = 0;
