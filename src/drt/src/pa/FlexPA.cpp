@@ -68,12 +68,17 @@ FlexPA::FlexPA(frDesign* in,
 // must be out-of-line due to the unique_ptr
 FlexPA::~FlexPA() = default;
 
+void FlexPA::print_unique()
+{
+  unique_insts_.report();
+}
+
 void FlexPA::setDebug(frDebugSettings* settings, odb::dbDatabase* db)
 {
   const bool on = settings->debugPA;
   graphics_ = on && FlexPAGraphics::guiActive()
                   ? std::make_unique<FlexPAGraphics>(
-                        settings, design_, db, logger_, router_cfg_)
+                      settings, design_, db, logger_, router_cfg_)
                   : nullptr;
 }
 
@@ -219,6 +224,29 @@ bool FlexPA::isMacroCell(frInst* inst)
   return (masterType.isBlock() || masterType.isPad()
           || masterType == dbMasterType::RING);
 }
+
+// void FlexPA::incrementalPinAccess(odb::dbInst* inst)
+// {
+//   // io::Parser::setInst(inst);
+//   for (auto& term: inst->getITerms()) {
+//     term->
+//   }
+//   // Finish converting db inst to fr inst
+// }
+
+// void FlexPA::incrementalPinAccess(frInst* inst)
+// {
+//   for (auto& term: inst->getDBInst()->getP) {
+//     for (auto& pin: )
+//   }
+//   for (auto& term: inst->getMaster()->getTerms()) {
+//     for (auto& pin: term->getPins()) {
+//       pin->clearPinAccess();
+//     }
+//   }
+//   genInstAccessPoints(inst);
+//   int num_valid_pattern = prepPatternInst(inst, curr_unique_inst_idx, 1.0);
+// }
 
 int FlexPA::main()
 {

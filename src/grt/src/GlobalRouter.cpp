@@ -74,6 +74,7 @@
 #include "sta/Parasitics.hh"
 #include "sta/Set.hh"
 #include "stt/SteinerTreeBuilder.h"
+#include "triton_route/TritonRoute.h"
 #include "utl/Logger.h"
 #include "utl/algorithms.h"
 
@@ -122,6 +123,7 @@ void GlobalRouter::init(utl::Logger* logger,
                         rsz::Resizer* resizer,
                         ant::AntennaChecker* antenna_checker,
                         dpl::Opendp* opendp,
+                        drt::TritonRoute* drt,
                         std::unique_ptr<AbstractRoutingCongestionDataSource>
                             routing_congestion_data_source,
                         std::unique_ptr<AbstractRoutingCongestionDataSource>
@@ -976,6 +978,7 @@ std::vector<odb::Point> GlobalRouter::findOnGridPositions(
   } else {
     // if odb doesn't have any APs, run the grt version considering the
     // center of the pin shapes
+    drt_->testebernardo();
     const int conn_layer = pin.getConnectionLayer();
     const std::vector<odb::Rect>& pin_boxes = pin.getBoxes().at(conn_layer);
     for (const odb::Rect& pin_box : pin_boxes) {

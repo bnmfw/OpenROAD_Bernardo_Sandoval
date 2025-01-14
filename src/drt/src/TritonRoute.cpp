@@ -220,10 +220,9 @@ std::string TritonRoute::runDRWorker(const std::string& workerStr,
 {
   bool on = debug_->debugDR;
   std::unique_ptr<FlexDRGraphics> graphics_
-      = on && FlexDRGraphics::guiActive()
-            ? std::make_unique<FlexDRGraphics>(
-                  debug_.get(), design_.get(), db_, logger_)
-            : nullptr;
+      = on && FlexDRGraphics::guiActive() ? std::make_unique<FlexDRGraphics>(
+            debug_.get(), design_.get(), db_, logger_)
+                                          : nullptr;
   auto worker = FlexDRWorker::load(
       workerStr, viaData, design_.get(), logger_, router_cfg_.get());
   worker->setGraphics(graphics_.get());
@@ -251,10 +250,9 @@ void TritonRoute::debugSingleWorker(const std::string& dumpDir,
   ar >> viaData;
 
   std::unique_ptr<FlexDRGraphics> graphics
-      = on && FlexDRGraphics::guiActive()
-            ? std::make_unique<FlexDRGraphics>(
-                  debug_.get(), design_.get(), db_, logger_)
-            : nullptr;
+      = on && FlexDRGraphics::guiActive() ? std::make_unique<FlexDRGraphics>(
+            debug_.get(), design_.get(), db_, logger_)
+                                          : nullptr;
   std::ifstream workerFile(fmt::format("{}/worker.bin", dumpDir),
                            std::ios::binary);
   std::string workerStr((std::istreambuf_iterator<char>(workerFile)),
@@ -1027,6 +1025,12 @@ int TritonRoute::main()
   return 0;
 }
 
+void TritonRoute::testebernardo()
+{
+  pa_->print_unique();
+}
+
+// Bookmark Roda o Pin Access Aqui
 void TritonRoute::pinAccess(const std::vector<odb::dbInst*>& target_insts)
 {
   if (distributed_) {
@@ -1045,14 +1049,15 @@ void TritonRoute::pinAccess(const std::vector<odb::dbInst*>& target_insts)
   router_cfg_->MAX_THREADS = ord::OpenRoad::openRoad()->getThreadCount();
   router_cfg_->ENABLE_VIA_GEN = true;
   initDesign();
-  FlexPA pa(getDesign(), logger_, dist_, router_cfg_.get());
-  pa.setTargetInstances(target_insts);
-  pa.setDebug(debug_.get(), db_);
+  pa_ = std::make_unique<FlexPA>(
+      getDesign(), logger_, dist_, router_cfg_.get());
+  pa_->setTargetInstances(target_insts);
+  pa_->setDebug(debug_.get(), db_);
   if (distributed_) {
-    pa.setDistributed(dist_ip_, dist_port_, shared_volume_, cloud_sz_);
+    pa_->setDistributed(dist_ip_, dist_port_, shared_volume_, cloud_sz_);
     dist_pool_->join();
   }
-  pa.main();
+  pa_->main();
   io::Writer writer(getDesign(), logger_);
   writer.updateDb(db_, router_cfg_.get(), true);
 }

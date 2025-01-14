@@ -82,6 +82,8 @@ class FlexPA
 
   int main();
 
+  void print_unique();
+
  private:
   frDesign* design_;
   Logger* logger_;
@@ -143,6 +145,9 @@ class FlexPA
 
   bool isStdCell(frInst* inst);
   bool isMacroCell(frInst* inst);
+
+  void incrementalPinAccess(frInst* inst);
+  void incrementalPinAccess(odb::dbInst* inst);
 
   /**
    * @brief generates all access points of a single unique instance

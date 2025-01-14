@@ -69,10 +69,10 @@ namespace drt {
 class frDesign;
 class DesignCallBack;
 class FlexDR;
+class FlexPA;
 class FlexDRWorker;
 class drUpdate;
 struct frDebugSettings;
-class FlexDR;
 struct FlexDRViaData;
 class frMarker;
 struct RouterConfiguration;
@@ -134,6 +134,8 @@ class TritonRoute
               bool followGuide);
 
   int getNumDRVs() const;
+
+  void testebernardo();
 
   void setDebugDR(bool on = true);
   void setDebugDumpDR(bool on, const std::string& dumpDir);
@@ -197,6 +199,7 @@ class TritonRoute
                 const std::string& marker_name);
   bool initGuide();
   void prep();
+  void deletePinAccess();
   odb::dbDatabase* getDb() const { return db_; }
   void fixMaxSpacing();
 
@@ -221,6 +224,7 @@ class TritonRoute
   int results_sz_{0};
   unsigned int cloud_sz_{0};
   std::optional<boost::asio::thread_pool> dist_pool_;
+  std::unique_ptr<drt::FlexPA> pa_;
 
   void initDesign();
   void gr();

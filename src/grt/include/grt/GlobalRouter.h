@@ -81,6 +81,10 @@ class Resizer;
 class SpefWriter;
 }  // namespace rsz
 
+namespace drt {
+class TritonRoute;
+}  // namespace drt
+
 namespace sta {
 class dbSta;
 class dbNetwork;
@@ -154,6 +158,7 @@ class GlobalRouter : public ant::GlobalRouteSource
             rsz::Resizer* resizer,
             ant::AntennaChecker* antenna_checker,
             dpl::Opendp* opendp,
+            drt::TritonRoute* drt,
             std::unique_ptr<AbstractRoutingCongestionDataSource>
                 routing_congestion_data_source,
             std::unique_ptr<AbstractRoutingCongestionDataSource>
@@ -472,6 +477,7 @@ class GlobalRouter : public ant::GlobalRouteSource
   ant::AntennaChecker* antenna_checker_;
   dpl::Opendp* opendp_;
   rsz::Resizer* resizer_;
+  drt::TritonRoute* drt_;
   // Objects variables
   FastRouteCore* fastroute_;
   odb::Point grid_origin_;
