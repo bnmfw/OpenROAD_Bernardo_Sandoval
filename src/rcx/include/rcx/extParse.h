@@ -30,86 +30,28 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "dbTargetItr.h"
+#pragma once
 
-#include "dbMTerm.h"
-#include "dbMaster.h"
-#include "dbTable.h"
-#include "dbTarget.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include "rcx/extParse.h"
+#include "utl/Logger.h"
 
 namespace odb {
 
-////////////////////////////////////////////////////////////////////
-//
-// dbTargetItr - Methods
-//
-////////////////////////////////////////////////////////////////////
+using odb::Ath__parser;
 
-bool dbTargetItr::reversible()
+class extParser : public Ath__parser
 {
-  return true;
-}
+ public:
+  // Constructor
+  extParser(utl::Logger* logger) : Ath__parser(logger) {}
+  void setDbg(int v) { _dbg = v; }
 
-bool dbTargetItr::orderReversed()
-{
-  return true;
-}
-
-void dbTargetItr::reverse(dbObject* parent)
-{
-  _dbMTerm* mterm = (_dbMTerm*) parent;
-  uint id = mterm->_targets;
-  uint list = 0;
-
-  while (id != 0) {
-    _dbTarget* target = _target_tbl->getPtr(id);
-    uint n = target->_next;
-    target->_next = list;
-    list = id;
-    id = n;
-  }
-
-  mterm->_targets = list;
-}
-
-uint dbTargetItr::sequential()
-{
-  return 0;
-}
-
-uint dbTargetItr::size(dbObject* parent)
-{
-  uint id;
-  uint cnt = 0;
-
-  for (id = dbTargetItr::begin(parent); id != dbTargetItr::end(parent);
-       id = dbTargetItr::next(id)) {
-    ++cnt;
-  }
-
-  return cnt;
-}
-
-uint dbTargetItr::begin(dbObject* parent)
-{
-  _dbMTerm* mterm = (_dbMTerm*) parent;
-  return mterm->_targets;
-}
-
-uint dbTargetItr::end(dbObject* /* unused: parent */)
-{
-  return 0;
-}
-
-uint dbTargetItr::next(uint id, ...)
-{
-  _dbTarget* target = _target_tbl->getPtr(id);
-  return target->_next;
-}
-
-dbObject* dbTargetItr::getObject(uint id, ...)
-{
-  return _target_tbl->getPtr(id);
-}
+ private:
+  int _dbg;
+};
 
 }  // namespace odb

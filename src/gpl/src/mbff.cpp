@@ -1317,7 +1317,7 @@ void MBFF::GetStartTrays(std::vector<Flop> flops,
   tray_zero.pt = flops[rand_idx].pt;
 
   std::set<int> used_flops;
-  used_flops.insert(rand_idx);
+  used_flops.insert(flops[rand_idx].idx);
   trays.push_back(tray_zero);
 
   float tot_dist = 0;
@@ -1892,7 +1892,7 @@ void MBFF::KMeansDecomp(const std::vector<Flop>& flops,
     k_means_ret[i].pop_back();
   }
 
-  // naive implementation of DSU
+  // naive implementation of Disjoint Set Union
   std::vector<int> id(best_k);
   std::vector<int> sz(best_k);
 
@@ -1955,6 +1955,23 @@ float MBFF::GetPairDisplacements()
   return ret;
 }
 
+void MBFF::displayFlopClusters(const char* stage,
+                               std::vector<std::vector<Flop>>& clusters)
+{
+  if (graphics_) {
+    for (const std::vector<Flop>& cluster : clusters) {
+      graphics_->status(fmt::format("{} size: {}", stage, cluster.size()));
+      std::vector<odb::dbInst*> inst_cluster;
+      inst_cluster.reserve(cluster.size());
+      for (const Flop& flop : cluster) {
+        inst_cluster.emplace_back(insts_[flop.idx]);
+      }
+      graphics_->mbffFlopClusters(inst_cluster);
+    }
+    graphics_->status("");
+  }
+}
+
 float MBFF::RunClustering(const std::vector<Flop>& flops,
                           const int mx_sz,
                           const float alpha,
@@ -1963,6 +1980,8 @@ float MBFF::RunClustering(const std::vector<Flop>& flops,
 {
   std::vector<std::vector<Flop>> pointsets;
   KMeansDecomp(flops, mx_sz, pointsets);
+
+  displayFlopClusters("Point sets", pointsets);
 
   // all_start_trays[t][i][j]: start trays of size 2^i, multistart = j for
   // pointset[t]
@@ -2062,7 +2081,7 @@ float MBFF::RunClustering(const std::vector<Flop>& flops,
       }
     }
 
-    graphics_->mbff_mapping(segs);
+    graphics_->mbffMapping(segs);
   }
 
   return ans;
@@ -2147,6 +2166,8 @@ void MBFF::SeparateFlops(std::vector<std::vector<Flop>>& ffs)
       }
     }
   }
+
+  displayFlopClusters("SeparateFlops", ffs);
 }
 
 void MBFF::SetTrayNames()
@@ -2191,8 +2212,16 @@ void MBFF::Run(const int mx_sz, const float alpha, const float beta)
     tot_ilp += RunClustering(FFs[i], mx_sz, alpha, beta, array_mask);
   }
 
+  // delete test_trays
+  for (int i = 0; i < test_idx_; i++) {
+    const std::string test_tray_name = "test_tray_" + std::to_string(i);
+    dbInst* inst = block_->findInst(test_tray_name.c_str());
+    dbInst::destroy(inst);
+  }
+
   if (!any_found) {
-    log_->error(GPL, 138, "No clusterable flops found");
+    log_->warn(GPL, 138, "No clusterable flops found");
+    return;
   }
 
   const float tcp_disp = (beta * GetPairDisplacements());
@@ -2210,13 +2239,6 @@ void MBFF::Run(const int mx_sz, const float alpha, const float beta)
     avg_disp += (std::max(dX, -dX) + std::max(dY, -dY));
   }
   avg_disp /= flops_.size();
-
-  // delete test_trays
-  for (int i = 0; i < test_idx_; i++) {
-    const std::string test_tray_name = "test_tray_" + std::to_string(i);
-    dbInst* inst = block_->findInst(test_tray_name.c_str());
-    dbInst::destroy(inst);
-  }
 
   log_->report("Alpha = {}, Beta = {}, #paths = {}, max size = {}",
                alpha,

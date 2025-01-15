@@ -32,79 +32,79 @@
 
 #pragma once
 
-#include "dbCore.h"
-#include "odb/dbId.h"
-#include "odb/geom.h"
-#include "odb/odb.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
-namespace odb {
+#include "odb/util.h"
+#include "util.h"
 
-class _dbTechLayer;
-class _dbTarget;
-class _dbDatabase;
-class _dbMTerm;
-class dbIStream;
-class dbOStream;
-class dbDiff;
+// amespace rcx {
 
-struct _dbTargetFlags
-{
-  uint _spare_bits : 32;
-};
+using uint = unsigned int;
 
-class _dbTarget : public _dbObject
+class NameTable
 {
  public:
-  // PERSISTANT-MEMBERS
-  _dbTargetFlags _flags;
-  Point _point;
-  dbId<_dbMTerm> _mterm;
-  dbId<_dbTechLayer> _layer;
-  dbId<_dbTarget> _next;
+  NameTable(uint n, char* zero = nullptr);
+  ~NameTable();
 
-  _dbTarget(_dbDatabase*, const _dbTarget& t);
-  _dbTarget(_dbDatabase*);
+  uint addNewName(const char* name, uint dataId);
+  const char* getName(uint poolId);
+  uint getDataId(const char* name,
+                 uint ignoreFlag = 0,
+                 uint exitFlag = 0,
+                 int* nn = nullptr);
 
-  bool operator==(const _dbTarget& rhs) const;
-  bool operator!=(const _dbTarget& rhs) const { return !operator==(rhs); }
-  void differences(dbDiff& diff, const char* field, const _dbTarget& rhs) const;
-  void out(dbDiff& diff, char side, const char* field) const;
+ private:
+  class NameBucket;
+
+  uint addName(const char* name, uint dataId);
+  uint getDataId(int poolId);
+
+  AthHash<int>* _hashTable;
+  odb::AthPool<NameBucket>* _bucketPool;
 };
 
-inline _dbTarget::_dbTarget(_dbDatabase*, const _dbTarget& t)
-    : _flags(t._flags),
-      _point(t._point),
-      _mterm(t._mterm),
-      _layer(t._layer),
-      _next(t._next)
+class Ath__nameBucket
 {
-}
+ private:
+  char* _name;
+  uint _tag;
 
-inline _dbTarget::_dbTarget(_dbDatabase*)
+ public:
+  void set(char* name, uint tag);
+  void deallocWord();
+
+  friend class Ath__nameTable;
+};
+
+class Ath__nameTable
 {
-  _flags._spare_bits = 0;
-}
+ private:
+  AthHash<int>* _hashTable;
+  odb::AthPool<Ath__nameBucket>* _bucketPool;
+  // int *nameMap; // TODO
 
-inline dbOStream& operator<<(dbOStream& stream, const _dbTarget& target)
-{
-  uint* bit_field = (uint*) &target._flags;
-  stream << *bit_field;
-  stream << target._point;
-  stream << target._mterm;
-  stream << target._layer;
-  stream << target._next;
-  return stream;
-}
+  void allocName(char* name, uint nameId, bool hash = false);
+  uint addName(char* name, uint dataId);
 
-inline dbIStream& operator>>(dbIStream& stream, _dbTarget& target)
-{
-  uint* bit_field = (uint*) &target._flags;
-  stream >> *bit_field;
-  stream >> target._point;
-  stream >> target._mterm;
-  stream >> target._layer;
-  stream >> target._next;
-  return stream;
-}
+ public:
+  ~Ath__nameTable();
+  Ath__nameTable(uint n, char* zero = NULL);
 
-}  // namespace odb
+  void writeDB(FILE* fp, char* nameType);
+  bool readDB(FILE* fp);
+  void addData(uint poolId, uint dataId);
+
+  uint addNewName(char* name, uint dataId);
+  char* getName(uint poolId);
+  uint getDataId(int poolId);
+  uint getTagId(char* name);
+  uint getDataId(char* name,
+                 uint ignoreFlag = 0,
+                 uint exitFlag = 0,
+                 int* nn = 0);
+};
+
+// }  // namespace rcx
