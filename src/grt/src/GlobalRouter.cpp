@@ -978,7 +978,7 @@ std::vector<odb::Point> GlobalRouter::findOnGridPositions(
   } else {
     // if odb doesn't have any APs, run the grt version considering the
     // center of the pin shapes
-    drt_->testebernardo();
+    drt_->dummyFunction();
     const int conn_layer = pin.getConnectionLayer();
     const std::vector<odb::Rect>& pin_boxes = pin.getBoxes().at(conn_layer);
     for (const odb::Rect& pin_box : pin_boxes) {

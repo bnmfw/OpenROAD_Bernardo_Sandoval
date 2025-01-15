@@ -1025,7 +1025,7 @@ int TritonRoute::main()
   return 0;
 }
 
-void TritonRoute::testebernardo()
+void TritonRoute::dummyFunction()
 {
   pa_->print_unique();
 }

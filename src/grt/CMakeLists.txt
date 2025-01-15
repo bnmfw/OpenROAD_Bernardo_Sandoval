@@ -88,6 +88,7 @@ target_link_libraries(grt_lib
     dbSta_lib
     stt_lib
     rsz_lib
+    drt
     OpenSTA
     Boost::boost
     OpenMP::OpenMP_CXX
@@ -103,6 +104,7 @@ target_link_libraries(grt
     gui
     stt
     rsz
+    drt
     OpenSTA
     Boost::boost
     OpenMP::OpenMP_CXX
@@ -131,6 +133,7 @@ if (Python3_FOUND AND BUILD_PYTHON)
       dbSta
       gui
       stt
+      drt
       OpenSTA
       Boost::boost
   )

@@ -135,7 +135,7 @@ class TritonRoute
 
   int getNumDRVs() const;
 
-  void testebernardo();
+  void dummyFunction();
 
   void setDebugDR(bool on = true);
   void setDebugDumpDR(bool on, const std::string& dumpDir);
