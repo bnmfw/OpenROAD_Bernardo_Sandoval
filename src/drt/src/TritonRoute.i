@@ -43,6 +43,8 @@
 
 %include "../../Exception.i"
 
+%ignore drt::TritonRoute::setDebugPAGraphics;
+
 %inline %{
 
 int detailed_route_num_drvs()
@@ -123,6 +125,7 @@ void detailed_route_cmd(const char* outputMazeFile,
                     minAccessPoints,
                     saveGuideUpdates,
                     repairPDNLayerName});
+  router->setDebugTAGraphics();
   router->main();
   router->setDistributed(false);
 }

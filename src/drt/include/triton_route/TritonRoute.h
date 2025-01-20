@@ -69,13 +69,15 @@ namespace drt {
 class frDesign;
 class DesignCallBack;
 class FlexDR;
+class FlexPA;
+class FlexTA;
 class FlexDRWorker;
 class drUpdate;
 struct frDebugSettings;
-class FlexDR;
 struct FlexDRViaData;
 class frMarker;
 struct RouterConfiguration;
+class AbstractPAGraphics;
 
 struct ParamStruct
 {
@@ -139,7 +141,9 @@ class TritonRoute
   void setDebugDumpDR(bool on, const std::string& dumpDir);
   void setDebugMaze(bool on = true);
   void setDebugPA(bool on = true);
+  void setDebugPAGraphics();
   void setDebugTA(bool on = true);
+  void setDebugTAGraphics();
   void setDebugWriteNetTracks(bool on = true);
   void setDebugNetName(const char* name);  // for DR
   void setDebugPinName(const char* name);  // for PA
@@ -221,6 +225,8 @@ class TritonRoute
   int results_sz_{0};
   unsigned int cloud_sz_{0};
   std::optional<boost::asio::thread_pool> dist_pool_;
+  std::unique_ptr<drt::FlexPA> pa_{nullptr};
+  std::unique_ptr<drt::FlexTA> ta_{nullptr};
 
   void initDesign();
   void gr();
