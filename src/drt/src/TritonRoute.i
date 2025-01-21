@@ -38,12 +38,15 @@
 #include <cstring>
 #include "ord/OpenRoad.hh"
 #include "triton_route/TritonRoute.h"
+#include "ta/AbstractTAGraphics.h"
+#include "pa/AbstractPAGraphics.h"
 #include "utl/Logger.h"
 %}
 
 %include "../../Exception.i"
 
 %ignore drt::TritonRoute::setDebugPAGraphics;
+%ignore drt::TritonRoute::setDebugTAGraphics;
 
 %inline %{
 

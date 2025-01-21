@@ -126,6 +126,11 @@ void TritonRoute::setDebugTAGraphics()
   ta_->setDebug(std::move(ta_graphics));
 }
 
+void TritonRoute::setDebugTAGraphics(std::unique_ptr<AbstractTAGraphics> ta_graphics)
+{
+  ta_->setDebug(std::move(ta_graphics));
+}
+
 void TritonRoute::setDistributed(bool on)
 {
   distributed_ = on;

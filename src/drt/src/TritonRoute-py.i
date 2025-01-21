@@ -43,3 +43,6 @@
 %include <std_string.i>
 %include "../../Exception-py.i"
 %include "triton_route/TritonRoute.h"
+
+%ignore drt::TritonRoute::setDebugPAGraphics;
+%ignore drt::TritonRoute::setDebugTAGraphics;

@@ -78,6 +78,7 @@ struct FlexDRViaData;
 class frMarker;
 struct RouterConfiguration;
 class AbstractPAGraphics;
+class AbstractTAGraphics;
 
 struct ParamStruct
 {
@@ -144,6 +145,7 @@ class TritonRoute
   void setDebugPAGraphics();
   void setDebugTA(bool on = true);
   void setDebugTAGraphics();
+  void setDebugTAGraphics(std::unique_ptr<AbstractTAGraphics> ta_graphics);
   void setDebugWriteNetTracks(bool on = true);
   void setDebugNetName(const char* name);  // for DR
   void setDebugPinName(const char* name);  // for PA
