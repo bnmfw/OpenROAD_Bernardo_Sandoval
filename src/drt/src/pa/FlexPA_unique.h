@@ -71,6 +71,15 @@ class UniqueInsts
   frInst* getUnique(int idx) const;
   frInst* getUnique(frInst* inst) const;
   bool hasUnique(frInst* inst) const;
+
+  /**
+   * @brief Adds the instance to the unique instances structures,
+   * inserting new data if it is actually a new unique instance.
+   *
+   * @returns if this instance if the first of its unique class.
+   */
+  bool addUniqueInst(frInst* inst);
+
   void deleteUniqueInst(frInst* inst);
 
   void report() const;
@@ -119,14 +128,6 @@ class UniqueInsts
    * LayerRange represents the lower and upper layer of a Master instance.
    */
   void initMasterToPinLayerRange();
-
-  /**
-   * @brief Adds the instance to the unique instances structures,
-   * inserting new data if it is actually a new unique instance.
-   *
-   * @returns if this instance if the first of its unique class.
-   */
-  bool addUniqueInst(frInst* inst);
 
   /**
    * @brief Computes all unique instances data structures.

@@ -270,6 +270,18 @@ int FlexPA::main()
   return 0;
 }
 
+void FlexPA::solveSingleInstancePA(frInst* inst)
+{
+  unique_insts_.deleteUniqueInst(inst);
+  deletePatternInst(inst);
+  const bool new_unique = unique_insts_.addUniqueInst(inst);
+  const int unique_inst_idx = unique_insts_.getIndex(inst);
+  if (new_unique) {
+    genInstAccessPoints(inst);
+    prepPatternInst(inst);
+  }
+}
+
 template <class Archive>
 void FlexPinAccessPattern::serialize(Archive& ar, const unsigned int version)
 {
