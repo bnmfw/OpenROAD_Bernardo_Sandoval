@@ -47,6 +47,7 @@
 #include "dst/JobMessage.h"
 #include "frProfileTask.h"
 #include "gc/FlexGC.h"
+#include "io/io.h"
 #include "serialization.h"
 
 BOOST_CLASS_EXPORT(drt::PinAccessJobDescription)
@@ -270,8 +271,12 @@ int FlexPA::main()
   return 0;
 }
 
-void FlexPA::solveSingleInstancePA(frInst* inst)
+void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
 {
+  frInst* inst = design_->getTopBlock()->findInst(db_inst);
+  if (!inst) {
+    io::Parser parser(db, getDesign(), logger_, router_cfg_);
+  }
   unique_insts_.deleteUniqueInst(inst);
   deletePatternInst(inst);
   const bool new_unique = unique_insts_.addUniqueInst(inst);

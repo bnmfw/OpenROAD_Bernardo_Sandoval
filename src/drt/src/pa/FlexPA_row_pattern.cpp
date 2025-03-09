@@ -136,10 +136,9 @@ void FlexPA::prepPatternInstRows(std::vector<std::vector<frInst*>> inst_rows)
     // choose access pattern of a row of insts
     int rowIdx = 0;
 #pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < (int) inst_rows.size(); i++) {  // NOLINT
+    for (std::vector<frInst*>& inst_row : inst_rows) {  // NOLINT
       try {
-        auto& instRow = inst_rows[i];
-        genInstRowPattern(instRow);
+        genInstRowPattern(inst_row);
 #pragma omp critical
         {
           rowIdx++;

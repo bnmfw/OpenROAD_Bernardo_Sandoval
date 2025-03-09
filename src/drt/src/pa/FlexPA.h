@@ -81,7 +81,7 @@ class FlexPA
                       const std::string& shared_vol,
                       int cloud_sz);
 
-  void solveSingleInstancePA(frInst* inst);
+  void solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst);
   int main();
 
  private:
