@@ -58,6 +58,10 @@ namespace dst {
 class Distributed;
 }
 
+namespace dpl {
+class Opendp;
+}
+
 namespace drt {
 
 class frDesign;
@@ -108,7 +112,8 @@ class TritonRoute
             utl::Logger* logger,
             dst::Distributed* dist,
             stt::SteinerTreeBuilder* stt_builder,
-            std::unique_ptr<AbstractGraphicsFactory> graphics_factory);
+            std::unique_ptr<AbstractGraphicsFactory> graphics_factory,
+            dpl::Opendp* opendp);
 
   frDesign* getDesign() const { return design_.get(); }
   utl::Logger* getLogger() const { return logger_; }
@@ -116,6 +121,7 @@ class TritonRoute
   {
     return router_cfg_.get();
   }
+  dpl::Opendp* getOpendp() const { return opendp_; }
 
   int main();
   void endFR();
@@ -221,6 +227,7 @@ class TritonRoute
   std::optional<boost::asio::thread_pool> dist_pool_;
   std::unique_ptr<FlexPA> pa_{nullptr};
   std::unique_ptr<AbstractGraphicsFactory> graphics_factory_{nullptr};
+  dpl::Opendp* opendp_{nullptr};
 
   void initDesign();
   void initGraphics();
