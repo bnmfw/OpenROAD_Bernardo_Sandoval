@@ -199,7 +199,7 @@ void UniqueInsts::computeUnique()
 
   std::set<frInst*> target_frinsts;
   for (auto inst : target_insts_) {
-    target_frinsts.insert(design_->getTopBlock()->findInst(inst->getName()));
+    target_frinsts.insert(design_->getTopBlock()->findInst(inst));
   }
 
   for (auto& inst : design_->getTopBlock()->getInsts()) {
@@ -326,8 +326,7 @@ void UniqueInsts::deleteUniqueInst(frInst* inst)
     // the inst does not belong to the class anymore, but is the reference
     // unique_inst, so the reference has to be another inst
     auto class_begin = inst_to_class_[inst]->begin();
-    frInst* new_head
-        = *class_begin != inst ? *class_begin : *(++class_begin);
+    frInst* new_head = *class_begin != inst ? *class_begin : *(++class_begin);
     unique_[unique_to_idx_[inst]] = new_head;
     for (frInst* other_inst : unique_class) {
       inst_to_unique_[other_inst] = new_head;
