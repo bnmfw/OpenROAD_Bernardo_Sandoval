@@ -276,15 +276,24 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
   frInst* inst = design_->getTopBlock()->findInst(db_inst);
   if (!inst) {
     io::Parser parser(db, getDesign(), logger_, router_cfg_);
+    inst = parser.setInst(db_inst);
+  } else {
+    bool last_of_class = (unique_insts_.getClass(inst)->size() == 1);
+    unique_insts_.deleteUniqueInst(inst);
+    if (last_of_class) {
+      // Precisa pegar o cornen case que a unique inst em si é deletada.
+      deletePatternInst(inst);
+    }
   }
-  unique_insts_.deleteUniqueInst(inst);
-  deletePatternInst(inst);
   const bool new_unique = unique_insts_.addUniqueInst(inst);
   const int unique_inst_idx = unique_insts_.getIndex(inst);
   if (new_unique) {
     genInstAccessPoints(inst);
     prepPatternInst(inst);
   }
+  std::vector<frInst*> inst_row;
+  // inst_row = função do eder aqui
+  genInstRowPattern(inst_row);
 }
 
 template <class Archive>
