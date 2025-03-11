@@ -74,6 +74,7 @@
 #include "sta/Parasitics.hh"
 #include "sta/Set.hh"
 #include "stt/SteinerTreeBuilder.h"
+#include "triton_route/TritonRoute.h"
 #include "utl/Logger.h"
 #include "utl/algorithms.h"
 
@@ -88,6 +89,7 @@ GlobalRouter::GlobalRouter()
       antenna_checker_(nullptr),
       opendp_(nullptr),
       resizer_(nullptr),
+      detailed_router_(nullptr),
       fastroute_(nullptr),
       grid_origin_(0, 0),
       groute_renderer_(nullptr),
@@ -122,6 +124,7 @@ void GlobalRouter::init(utl::Logger* logger,
                         rsz::Resizer* resizer,
                         ant::AntennaChecker* antenna_checker,
                         dpl::Opendp* opendp,
+                        drt::TritonRoute* detailed_router,
                         std::unique_ptr<AbstractRoutingCongestionDataSource>
                             routing_congestion_data_source,
                         std::unique_ptr<AbstractRoutingCongestionDataSource>
@@ -133,6 +136,7 @@ void GlobalRouter::init(utl::Logger* logger,
   stt_builder_ = stt_builder;
   antenna_checker_ = antenna_checker;
   opendp_ = opendp;
+  detailed_router_ = detailed_router;
   fastroute_ = new FastRouteCore(db_, logger_, stt_builder_);
   sta_ = sta;
   resizer_ = resizer;

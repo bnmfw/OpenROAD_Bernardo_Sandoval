@@ -72,6 +72,7 @@ target_link_libraries(grt_lib
     dbSta_lib
     stt_lib
     rsz_lib
+    drt_lib
     OpenSTA
     Boost::boost
     OpenMP::OpenMP_CXX
@@ -95,18 +96,10 @@ target_include_directories(grt
 
 target_link_libraries(grt
     grt_lib
-    utl_lib
-    drt_lib
-    FastRoute4.1
-    ant_lib
-    dpl_lib
     dbSta
     gui
     stt
     rsz
-    OpenSTA
-    Boost::boost
-    OpenMP::OpenMP_CXX
 )
 
 if (Python3_FOUND AND BUILD_PYTHON)
