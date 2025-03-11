@@ -296,6 +296,9 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
   }
   std::vector<frInst*> inst_row;
   // inst_row = função do eder aqui
+  for (odb::dbInst* db_inst : opendp_->getAdjacentInstancesCluster(db_inst)) {
+    inst_row.push_back(design_->getTopBlock()->findInst(db_inst));
+  }
   genInstRowPattern(inst_row);
 }
 
