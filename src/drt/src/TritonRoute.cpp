@@ -224,6 +224,12 @@ std::string TritonRoute::runDRWorker(const std::string& workerStr,
   return result;
 }
 
+void TritonRoute::solveSingleInstancePA(odb::dbDatabase* db,
+                                        odb::dbInst* db_inst)
+{
+  pa_->solveSingleInstancePA(db, db_inst);
+}
+
 void TritonRoute::debugSingleWorker(const std::string& dumpDir,
                                     const std::string& drcRpt)
 {
@@ -1064,16 +1070,17 @@ void TritonRoute::pinAccess(const std::vector<odb::dbInst*>& target_insts)
   clearDesign();
   router_cfg_->ENABLE_VIA_GEN = true;
   initDesign();
-  FlexPA pa(getDesign(), logger_, dist_, router_cfg_.get(), opendp_);
-  pa.setTargetInstances(target_insts);
+  pa_ = std::make_unique<FlexPA>(
+      getDesign(), logger_, dist_, router_cfg_.get(), opendp_);
+  pa_->setTargetInstances(target_insts);
   if (debug_->debugPA) {
-    pa.setDebug(graphics_factory_->makeUniquePAGraphics());
+    pa_->setDebug(graphics_factory_->makeUniquePAGraphics());
   }
   if (distributed_) {
-    pa.setDistributed(dist_ip_, dist_port_, shared_volume_, cloud_sz_);
+    pa_->setDistributed(dist_ip_, dist_port_, shared_volume_, cloud_sz_);
     dist_pool_->join();
   }
-  pa.main();
+  pa_->main();
   io::Writer writer(getDesign(), logger_);
   writer.updateDb(db_, router_cfg_.get(), true);
 }

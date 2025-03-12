@@ -320,7 +320,7 @@ void GlobalRouter::globalRoute(bool save_guides,
     }
     grouter_cbk_ = new GRouteDbCbk(this);
     grouter_cbk_->addOwner(block_);
-    skip_drt_aps_ = true;
+    incremental_ = true;
   } else {
     try {
       if (end_incremental) {
@@ -328,7 +328,7 @@ void GlobalRouter::globalRoute(bool save_guides,
         grouter_cbk_->removeOwner();
         delete grouter_cbk_;
         grouter_cbk_ = nullptr;
-        skip_drt_aps_ = false;
+        incremental_ = false;
       } else {
         clear();
         block_ = db_->getChip()->getBlock();
@@ -434,6 +434,7 @@ int GlobalRouter::repairAntennas(odb::dbMTerm* diode_mterm,
                   "routing source is detailed routing.");
   }
 
+  incremental_ = true;
   while (violations && itr < iterations) {
     if (verbose_) {
       logger_->info(GRT, 6, "Repairing antennas, iteration {}.", itr + 1);
@@ -476,6 +477,7 @@ int GlobalRouter::repairAntennas(odb::dbMTerm* diode_mterm,
     repair_antennas_->clearViolations();
     itr++;
   }
+  incremental_ = false;
   logger_->metric("antenna_diodes_count", total_diodes_count_);
   saveGuides();
   return total_diodes_count_;
@@ -966,9 +968,16 @@ std::vector<odb::Point> GlobalRouter::findOnGridPositions(
 
   // temporarily ignore odb access points when incremental changes
   // are made, in order to avoid getting invalid APs
-  // TODO: remove the !skip_drt_aps_ flag and update APs incrementally in odb
+  // TODO: remove the !incremental_ flag and update APs incrementally in odb
+  // logger_->report("[BNMFW] {}", incremental_);
+  if (incremental_) {
+    if (pin.getITerm()) {
+      detailed_router_->solveSingleInstancePA(db_, pin.getITerm()->getInst());
+    }
+  }
+
   has_access_points
-      = findPinAccessPointPositions(pin, ap_positions) && !skip_drt_aps_;
+      = findPinAccessPointPositions(pin, ap_positions) && !incremental_;
 
   std::vector<odb::Point> positions_on_grid;
 
@@ -2205,7 +2214,7 @@ void GlobalRouter::loadGuidesFromDB()
   if (!routes_.empty()) {
     return;
   }
-  skip_drt_aps_ = true;
+  incremental_ = true;
   initGridAndNets();
   for (odb::dbNet* net : block_->getNets()) {
     for (odb::dbGuide* guide : net->getGuides()) {

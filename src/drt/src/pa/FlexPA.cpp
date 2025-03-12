@@ -276,29 +276,37 @@ int FlexPA::main()
 
 void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
 {
+  incremental_ = true;
+  logger_->report("[BNMFW] Incremental PA for {}", db_inst->getName());
   frInst* inst = design_->getTopBlock()->findInst(db_inst);
   if (!inst) {
+    logger_->report("[BNMFW] New inst");
     io::Parser parser(db, getDesign(), logger_, router_cfg_);
     inst = parser.setInst(db_inst);
   } else {
+    logger_->report("[BNMFW] Deleting existing inst");
     bool last_of_class = (unique_insts_.getClass(inst)->size() == 1);
     unique_insts_.deleteUniqueInst(inst);
     if (last_of_class) {
-      // Precisa pegar o cornen case que a unique inst em si é deletada.
+      logger_->report("[BNMFW] Deleting pattern");
+      // Precisa pegar o corner case que a unique inst em si é deletada.
       deletePatternInst(inst);
     }
   }
   const bool new_unique = unique_insts_.addUniqueInst(inst);
   const int unique_inst_idx = unique_insts_.getIndex(inst);
   if (new_unique) {
+    logger_->report("[BNMFW] New unique inst");
     genInstAccessPoints(inst);
+    logger_->report("[BNMFW] New pattern");
     prepPatternInst(inst);
   }
   std::vector<frInst*> inst_row;
-  // inst_row = função do eder aqui
+  logger_->report("[BNMFW] Row finding");
   for (odb::dbInst* db_inst : opendp_->getAdjacentInstancesCluster(db_inst)) {
     inst_row.push_back(design_->getTopBlock()->findInst(db_inst));
   }
+  logger_->report("[BNMFW] Cluster of size {}", inst_row.size());
   genInstRowPattern(inst_row);
 }
 

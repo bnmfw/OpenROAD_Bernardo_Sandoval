@@ -94,6 +94,7 @@ class FlexPA
   Logger* logger_;
   dst::Distributed* dist_;
   RouterConfiguration* router_cfg_;
+  bool incremental_{false};
 
   std::unique_ptr<AbstractPAGraphics> graphics_;
   std::string debugPinName_;
