@@ -277,6 +277,7 @@ int FlexPA::main()
 void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
 {
   incremental_ = true;
+  unique_insts_.incremental_ = true;
   logger_->report("[BNMFW] Incremental PA for {}", db_inst->getName());
   frInst* inst = design_->getTopBlock()->findInst(db_inst);
   if (!inst) {
@@ -297,6 +298,8 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
   const int unique_inst_idx = unique_insts_.getIndex(inst);
   if (new_unique) {
     logger_->report("[BNMFW] New unique inst");
+    initSkipInstTerm(inst);
+    logger_->report("[BNMFW] New ap");
     genInstAccessPoints(inst);
     logger_->report("[BNMFW] New pattern");
     prepPatternInst(inst);

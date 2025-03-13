@@ -85,6 +85,8 @@ class UniqueInsts
   void report() const;
   void setDesign(frDesign* design) { design_ = design; }
 
+  bool incremental_ = false;
+
  private:
   using LayerRange = std::pair<frLayerNum, frLayerNum>;
   using MasterLayerRange = std::map<frMaster*, LayerRange, frBlockObjectComp>;
