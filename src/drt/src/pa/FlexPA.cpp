@@ -297,6 +297,7 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
   const bool new_unique = unique_insts_.addUniqueInst(inst);
   const int unique_inst_idx = unique_insts_.getIndex(inst);
   if (new_unique) {
+    unique_insts_.initUniqueInstPinAccess(inst);
     logger_->report("[BNMFW] New unique inst");
     initSkipInstTerm(inst);
     logger_->report("[BNMFW] New ap");
@@ -306,10 +307,13 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
   }
   std::vector<frInst*> inst_row;
   logger_->report("[BNMFW] Row finding");
-  for (odb::dbInst* db_inst : opendp_->getAdjacentInstancesCluster(db_inst)) {
+  auto db_inst_row = opendp_->getAdjacentInstancesCluster(db_inst);
+  logger_->report("[BNMFW] Cluster of size {}", inst_row.size());
+  for (odb::dbInst* db_inst : db_inst_row) {
+    logger_->report("[BNMFW] Converting inst {}", db_inst->getName());
     inst_row.push_back(design_->getTopBlock()->findInst(db_inst));
   }
-  logger_->report("[BNMFW] Cluster of size {}", inst_row.size());
+  logger_->report("[BNMFW] Finished cluster of size {}", inst_row.size());
   genInstRowPattern(inst_row);
 }
 

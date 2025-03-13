@@ -82,6 +82,8 @@ class UniqueInsts
 
   void deleteUniqueInst(frInst* inst);
 
+  void initUniqueInstPinAccess(frInst* unique_inst);
+
   void report() const;
   void setDesign(frDesign* design) { design_ = design; }
 
@@ -123,7 +125,6 @@ class UniqueInsts
    * Fills unique_to_pa_idx_adds pin access unique points to pins
    */
   void initPinAccess();
-  void initUniqueInstPinAccess(frInst* unique_inst);
 
   /**
    * @brief Creates a map from Master instance to LayerRanges.
