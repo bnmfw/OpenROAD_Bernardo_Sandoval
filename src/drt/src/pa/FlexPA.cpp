@@ -285,16 +285,16 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
     io::Parser parser(db, getDesign(), logger_, router_cfg_);
     inst = parser.setInst(db_inst);
   } else {
+    const bool is_own_unique = (inst == unique_insts_.getUnique(inst));
     logger_->report("[BNMFW] Deleting existing inst");
-    bool last_of_class = (unique_insts_.getClass(inst)->size() == 1);
-    unique_insts_.deleteUniqueInst(inst);
-    if (last_of_class) {
+    frInst* class_head = unique_insts_.deleteInst(inst);
+    if (!class_head) {
       logger_->report("[BNMFW] Deleting pattern");
       // Precisa pegar o corner case que a unique inst em si é deletada.
       deletePatternInst(inst);
     }
   }
-  const bool new_unique = unique_insts_.addUniqueInst(inst);
+  const bool new_unique = unique_insts_.addInst(inst);
   const int unique_inst_idx = unique_insts_.getIndex(inst);
   if (new_unique) {
     unique_insts_.initUniqueInstPinAccess(inst);

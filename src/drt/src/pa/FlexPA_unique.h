@@ -78,9 +78,17 @@ class UniqueInsts
    *
    * @returns if this instance if the first of its unique class.
    */
-  bool addUniqueInst(frInst* inst);
+  bool addInst(frInst* inst);
 
-  void deleteUniqueInst(frInst* inst);
+  /**
+   * @brief deletes an inst from the unique insts structures
+   *
+   * @param inst instance to be deleted
+   *
+   * @returns the unique inst that represents the unique class. If the class was
+   * deleted returns nullptr
+   */
+  frInst* deleteInst(frInst* inst);
 
   void initUniqueInstPinAccess(frInst* unique_inst);
 
