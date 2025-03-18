@@ -173,13 +173,12 @@ bool UniqueInsts::addInst(frInst* inst)
   inst_to_class_[inst] = &unique_class;
 
   frInst* unique_inst = nullptr;
-  bool new_unique_class = false;
-  if (unique_class.empty()) {
+  bool new_unique_class = unique_class.empty();
+  if (new_unique_class) {
     int i = unique_.size();
     unique_.push_back(inst);
     unique_to_idx_[inst] = i;
     unique_inst = inst;
-    new_unique_class = true;
   } else {
     // guarantees everyone on the class has the same unique_inst (the first
     // that came)
@@ -312,7 +311,7 @@ bool UniqueInsts::hasUnique(frInst* inst) const
 frInst* UniqueInsts::deleteInst(frInst* inst)
 {
   UniqueInsts::InstSet& unique_class = *inst_to_class_[inst];
-  frInst* class_head = inst;
+  frInst* class_head = inst_to_unique_[inst];
   if (unique_class.size() == 1) {
     auto it = std::find(unique_.begin(), unique_.end(), inst);
     if (it == unique_.end()) {
@@ -321,20 +320,18 @@ frInst* UniqueInsts::deleteInst(frInst* inst)
                      "{} not found on unique insts, although being the only "
                      "one of its unique class");
     }
-    int i = (int) std::distance(unique_.begin(), it);
 
     // readjusts unique_to_idx_ to compensate for posterior unique deletion
-    for (frInst* unique_inst : unique_) {
-      if (unique_to_idx_[unique_inst] >= i) {
-        unique_to_idx_[unique_inst]--;
-      }
+    for (int i = unique_to_idx_[inst]; i < unique_.size(); i++) {
+      auto unique_inst = unique_[i];
+      unique_to_idx_[unique_inst]--;
     }
     unique_.erase(it);
     unique_to_idx_.erase(inst);
     unique_to_pa_idx_.erase(inst);
     class_head = nullptr;
 
-  } else if (inst == inst_to_unique_[inst] && unique_class.size() > 1) {
+  } else if (inst == inst_to_unique_[inst]) {
     // the inst does not belong to the class anymore, but is the reference
     // unique_inst, so the reference has to be another inst
     auto class_begin = inst_to_class_[inst]->begin();

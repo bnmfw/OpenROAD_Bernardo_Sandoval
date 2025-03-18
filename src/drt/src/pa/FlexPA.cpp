@@ -291,7 +291,7 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
     if (!class_head) {
       logger_->report("[BNMFW] Deleting pattern");
       // Precisa pegar o corner case que a unique inst em si é deletada.
-      deletePatternInst(inst);
+      // deletePatternInst(inst);
     }
   }
   const bool new_unique = unique_insts_.addInst(inst);
