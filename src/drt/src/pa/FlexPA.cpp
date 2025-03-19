@@ -298,26 +298,34 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
 {
   incremental_ = true;
   unique_insts_.incremental_ = true;
-  logger_->report("[BNMFW] Incremental PA for {}", db_inst->getName());
+  bool inst_already_solved = false;
+  // logger_->report("[BNMFW] Incremental PA for {}", db_inst->getName());
   frInst* inst = design_->getTopBlock()->findInst(db_inst);
   if (!inst) {
-    logger_->report("[BNMFW] New inst");
+    // logger_->report("[BNMFW] New inst");
     io::Parser parser(db, getDesign(), logger_, router_cfg_);
     inst = parser.setInst(db_inst);
   } else {
-    deleteInst(inst);
+    if (unique_insts_.computeUniqueClass(inst)
+        == *unique_insts_.getClass(inst)) {
+      inst_already_solved = true;
+    } else {
+      deleteInst(inst);
+    }
   }
-  const bool new_unique = unique_insts_.addInst(inst);
-  if (new_unique) {
-    unique_insts_.initUniqueInstPinAccess(inst);
-    // logger_->report("[BNMFW] New unique inst");
-    initSkipInstTerm(inst);
-    // logger_->report("[BNMFW] New ap");
-    genInstAccessPoints(inst);
-    // logger_->report("[BNMFW] New pattern");
-    prepPatternInst(inst);
+  if (!inst_already_solved) {
+    const bool new_unique = unique_insts_.addInst(inst);
+    if (new_unique) {
+      unique_insts_.initUniqueInstPinAccess(inst);
+      // logger_->report("[BNMFW] New unique inst");
+      initSkipInstTerm(inst);
+      // logger_->report("[BNMFW] New ap");
+      genInstAccessPoints(inst);
+      // logger_->report("[BNMFW] New pattern");
+      prepPatternInst(inst);
+    }
+    inst->setPinAccessIdx(unique_insts_.getUnique(inst)->getPinAccessIdx());
   }
-  inst->setPinAccessIdx(unique_insts_.getUnique(inst)->getPinAccessIdx());
   std::vector<frInst*> inst_row;
   // logger_->report("[BNMFW] Row finding");
   auto db_inst_row = opendp_->getAdjacentInstancesCluster(db_inst);
