@@ -51,7 +51,7 @@ class frInst : public frRef
   {
   }
   // used for archive serialization
-  frInst() : name_(""), master_(nullptr), db_inst_(nullptr) {}
+  frInst() : master_(nullptr), db_inst_(nullptr) {}
 
   // getters
   const frString& getName() const { return name_; }
@@ -150,7 +150,7 @@ class frInst : public frRef
   std::vector<std::unique_ptr<frInstBlockage>> instBlockages_;
   odb::dbInst* db_inst_;
   dbTransform xform_;
-  int pinAccessIdx_{0};
+  int pinAccessIdx_{-1};
   bool toBeDeleted_{false};
 };
 

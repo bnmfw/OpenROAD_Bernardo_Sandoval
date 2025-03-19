@@ -100,6 +100,26 @@ void FlexPA::init()
   initAllSkipInstTerm();
 }
 
+void FlexPA::deleteInst(frInst* inst)
+{
+  const bool is_class_head = (inst == unique_insts_.getUnique(inst));
+  // if inst is the class head the new head will be returned by deleteInst()
+  frInst* class_head = unique_insts_.deleteInst(inst);
+  UniqueInsts::InstSet* unique_class = unique_insts_.getClass(inst);
+  // whole class has to be deleted
+  if (!class_head) {
+    unique_inst_patterns_.erase(inst);
+    for (auto& inst_term : inst->getInstTerms()) {
+      skip_unique_inst_term_.erase({unique_class, inst_term->getTerm()});
+    }
+  }
+  // new class representative has to be chosen
+  else if (is_class_head) {
+    unique_inst_patterns_[class_head] = std::move(unique_inst_patterns_[inst]);
+    unique_inst_patterns_.erase(inst);
+  }
+}
+
 void FlexPA::applyPatternsFile(const char* file_path)
 {
   unique_inst_patterns_.clear();
@@ -285,35 +305,28 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
     io::Parser parser(db, getDesign(), logger_, router_cfg_);
     inst = parser.setInst(db_inst);
   } else {
-    const bool is_own_unique = (inst == unique_insts_.getUnique(inst));
-    logger_->report("[BNMFW] Deleting existing inst");
-    frInst* class_head = unique_insts_.deleteInst(inst);
-    if (!class_head) {
-      logger_->report("[BNMFW] Deleting pattern");
-      // Precisa pegar o corner case que a unique inst em si é deletada.
-      // deletePatternInst(inst);
-    }
+    deleteInst(inst);
   }
   const bool new_unique = unique_insts_.addInst(inst);
-  const int unique_inst_idx = unique_insts_.getIndex(inst);
   if (new_unique) {
     unique_insts_.initUniqueInstPinAccess(inst);
-    logger_->report("[BNMFW] New unique inst");
+    // logger_->report("[BNMFW] New unique inst");
     initSkipInstTerm(inst);
-    logger_->report("[BNMFW] New ap");
+    // logger_->report("[BNMFW] New ap");
     genInstAccessPoints(inst);
-    logger_->report("[BNMFW] New pattern");
+    // logger_->report("[BNMFW] New pattern");
     prepPatternInst(inst);
   }
+  inst->setPinAccessIdx(unique_insts_.getUnique(inst)->getPinAccessIdx());
   std::vector<frInst*> inst_row;
-  logger_->report("[BNMFW] Row finding");
+  // logger_->report("[BNMFW] Row finding");
   auto db_inst_row = opendp_->getAdjacentInstancesCluster(db_inst);
-  logger_->report("[BNMFW] Cluster of size {}", inst_row.size());
+  // logger_->report("[BNMFW] Cluster of size {}", inst_row.size());
   for (odb::dbInst* db_inst : db_inst_row) {
-    logger_->report("[BNMFW] Converting inst {}", db_inst->getName());
+    // logger_->report("[BNMFW] Converting inst {}", db_inst->getName());
     inst_row.push_back(design_->getTopBlock()->findInst(db_inst));
   }
-  logger_->report("[BNMFW] Finished cluster of size {}", inst_row.size());
+  // logger_->report("[BNMFW] Finished cluster of size {}", inst_row.size());
   genInstRowPattern(inst_row);
 }
 
