@@ -744,6 +744,8 @@ class FlexPA
 
   void getInsts(std::vector<frInst*>& insts);
 
+  void FlexPA::prepPatternAllRows();
+
   void prepPatternInstRows(std::vector<std::vector<frInst*>> inst_rows);
 
   /**

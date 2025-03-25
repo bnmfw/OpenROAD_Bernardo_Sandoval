@@ -93,6 +93,47 @@ void FlexPA::getInsts(std::vector<frInst*>& insts)
   }
 }
 
+void FlexPA::prepPatternAllRows()
+{
+  // prep pattern for each row
+  std::vector<frInst*> insts;
+  std::vector<std::vector<frInst*>> inst_rows;
+  std::vector<frInst*> row_insts;
+
+  auto instLocComp = [](frInst* const& a, frInst* const& b) {
+    const Point originA = a->getOrigin();
+    const Point originB = b->getOrigin();
+    if (originA.y() == originB.y()) {
+      return (originA.x() < originB.x());
+    }
+    return (originA.y() < originB.y());
+  };
+
+  getInsts(insts);
+  std::sort(insts.begin(), insts.end(), instLocComp);
+
+  // gen rows of insts
+  int prev_y_coord = INT_MIN;
+  int prev_x_end_coord = INT_MIN;
+  for (auto inst : insts) {
+    Point origin = inst->getOrigin();
+    if (origin.y() != prev_y_coord || origin.x() > prev_x_end_coord) {
+      if (!row_insts.empty()) {
+        inst_rows.push_back(row_insts);
+        row_insts.clear();
+      }
+    }
+    row_insts.push_back(inst);
+    prev_y_coord = origin.y();
+    Rect inst_boundary_box = inst->getBoundaryBBox();
+    prev_x_end_coord = inst_boundary_box.xMax();
+  }
+  if (!row_insts.empty()) {
+    inst_rows.push_back(row_insts);
+  }
+  prepPatternInstRows(std::move(inst_rows));
+}
+
 void FlexPA::prepPattern()
 {
   ProfileTask profile("PA:pattern");
@@ -151,44 +192,6 @@ void FlexPA::prepPattern()
           utl::DRT, 330, "Error sending UPDATE_PATTERNS Job to cloud");
     }
   }
-
-  // prep pattern for each row
-  std::vector<frInst*> insts;
-  std::vector<std::vector<frInst*>> inst_rows;
-  std::vector<frInst*> row_insts;
-
-  auto instLocComp = [](frInst* const& a, frInst* const& b) {
-    const Point originA = a->getOrigin();
-    const Point originB = b->getOrigin();
-    if (originA.y() == originB.y()) {
-      return (originA.x() < originB.x());
-    }
-    return (originA.y() < originB.y());
-  };
-
-  getInsts(insts);
-  std::sort(insts.begin(), insts.end(), instLocComp);
-
-  // gen rows of insts
-  int prev_y_coord = INT_MIN;
-  int prev_x_end_coord = INT_MIN;
-  for (auto inst : insts) {
-    Point origin = inst->getOrigin();
-    if (origin.y() != prev_y_coord || origin.x() > prev_x_end_coord) {
-      if (!row_insts.empty()) {
-        inst_rows.push_back(row_insts);
-        row_insts.clear();
-      }
-    }
-    row_insts.push_back(inst);
-    prev_y_coord = origin.y();
-    Rect inst_boundary_box = inst->getBoundaryBBox();
-    prev_x_end_coord = inst_boundary_box.xMax();
-  }
-  if (!row_insts.empty()) {
-    inst_rows.push_back(row_insts);
-  }
-  prepPatternInstRows(std::move(inst_rows));
 }
 
 void FlexPA::prepPatternInst(frInst* unique_inst)
