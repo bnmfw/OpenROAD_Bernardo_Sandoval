@@ -330,48 +330,14 @@ int FlexPA::main()
   return 0;
 }
 
-void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
+void FlexPA::solveSingleInstancePA(odb::dbDatabase* db,
+                                   std::set<odb::dbInst*> db_insts)
 {
-  incremental_ = true;
-  unique_insts_.incremental_ = true;
-  bool inst_already_solved = false;
-  // logger_->report("[BNMFW] Incremental PA for {}", db_inst->getName());
-  frInst* inst = design_->getTopBlock()->findInst(db_inst);
-  if (!inst) {
-    // logger_->report("[BNMFW] New inst");
-    io::Parser parser(db, getDesign(), logger_, router_cfg_);
-    inst = parser.setInst(db_inst);
-  } else {
-    if (unique_insts_.computeUniqueClass(inst)
-        == *unique_insts_.getClass(inst)) {
-      inst_already_solved = true;
-    } else {
-      deleteInst(inst);
-    }
+  std::set<frInst*> insts;
+  for (odb::dbInst* db_inst : db_insts) {
+    insts.insert(updateInst(db, db_inst));
   }
-  if (!inst_already_solved) {
-    const bool new_unique = unique_insts_.addInst(inst);
-    if (new_unique) {
-      unique_insts_.initUniqueInstPinAccess(inst);
-      // logger_->report("[BNMFW] New unique inst");
-      initSkipInstTerm(inst);
-      // logger_->report("[BNMFW] New ap");
-      genInstAccessPoints(inst);
-      // logger_->report("[BNMFW] New pattern");
-      prepPatternInst(inst);
-    }
-    inst->setPinAccessIdx(unique_insts_.getUnique(inst)->getPinAccessIdx());
-  }
-  std::vector<frInst*> inst_row;
-  // logger_->report("[BNMFW] Row finding");
-  auto db_inst_row = opendp_->getAdjacentInstancesCluster(db_inst);
-  // logger_->report("[BNMFW] Cluster of size {}", inst_row.size());
-  for (odb::dbInst* db_inst : db_inst_row) {
-    // logger_->report("[BNMFW] Converting inst {}", db_inst->getName());
-    inst_row.push_back(design_->getTopBlock()->findInst(db_inst));
-  }
-  // logger_->report("[BNMFW] Finished cluster of size {}", inst_row.size());
-  genInstRowPattern(inst_row);
+  std::vector<frInst*> inst_rows;
 }
 
 template <class Archive>
