@@ -159,7 +159,8 @@ class FlexPA
   bool isMacroCell(frInst* unique_inst);
 
   void deleteInst(frInst* inst);
-  void updateInst(odb::dbDatabase* db, odb::dbInst* db_inst);
+  void updateInst(frInst* inst);
+  frInst* updateInst(odb::dbDatabase* db, odb::dbInst* db_inst);
 
   /**
    * @brief generates all access points of a single unique instance

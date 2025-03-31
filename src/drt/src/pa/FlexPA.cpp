@@ -121,14 +121,10 @@ void FlexPA::deleteInst(frInst* inst)
   }
 }
 
-void FlexPA::updateInst(odb::dbDatabase* db, odb::dbInst* db_inst)
+void FlexPA::updateInst(frInst* inst)
 {
   bool inst_already_solved = false;
-  frInst* inst = design_->getTopBlock()->findInst(db_inst);
-  if (!inst) {
-    io::Parser parser(db, getDesign(), logger_, router_cfg_);
-    inst = parser.setInst(db_inst);
-  } else {
+  if (inst->hasPinAccessIdx()) {
     if (unique_insts_.computeUniqueClass(inst)
         == *unique_insts_.getClass(inst)) {
       inst_already_solved = true;
@@ -146,6 +142,18 @@ void FlexPA::updateInst(odb::dbDatabase* db, odb::dbInst* db_inst)
     }
     inst->setPinAccessIdx(unique_insts_.getUnique(inst)->getPinAccessIdx());
   }
+}
+
+frInst* FlexPA::updateInst(odb::dbDatabase* db, odb::dbInst* db_inst)
+{
+  bool inst_already_solved = false;
+  frInst* inst = design_->getTopBlock()->findInst(db_inst);
+  if (!inst) {
+    io::Parser parser(db, getDesign(), logger_, router_cfg_);
+    inst = parser.setInst(db_inst);
+  }
+  updateInst(inst);
+  return inst;
 }
 
 void FlexPA::applyPatternsFile(const char* file_path)
