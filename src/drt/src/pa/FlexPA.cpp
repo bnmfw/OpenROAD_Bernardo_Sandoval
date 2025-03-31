@@ -36,6 +36,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "AbstractPAGraphics.h"
@@ -117,6 +118,33 @@ void FlexPA::deleteInst(frInst* inst)
   else if (is_class_head) {
     unique_inst_patterns_[class_head] = std::move(unique_inst_patterns_[inst]);
     unique_inst_patterns_.erase(inst);
+  }
+}
+
+void FlexPA::updateInst(odb::dbDatabase* db, odb::dbInst* db_inst)
+{
+  bool inst_already_solved = false;
+  frInst* inst = design_->getTopBlock()->findInst(db_inst);
+  if (!inst) {
+    io::Parser parser(db, getDesign(), logger_, router_cfg_);
+    inst = parser.setInst(db_inst);
+  } else {
+    if (unique_insts_.computeUniqueClass(inst)
+        == *unique_insts_.getClass(inst)) {
+      inst_already_solved = true;
+    } else {
+      deleteInst(inst);
+    }
+  }
+  if (!inst_already_solved) {
+    const bool new_unique = unique_insts_.addInst(inst);
+    if (new_unique) {
+      unique_insts_.initUniqueInstPinAccess(inst);
+      initSkipInstTerm(inst);
+      genInstAccessPoints(inst);
+      prepPatternInst(inst);
+    }
+    inst->setPinAccessIdx(unique_insts_.getUnique(inst)->getPinAccessIdx());
   }
 }
 

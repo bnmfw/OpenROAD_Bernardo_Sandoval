@@ -31,6 +31,8 @@
 #include <boost/polygon/polygon.hpp>
 #include <boost/serialization/unordered_map.hpp>
 #include <cstdint>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "FlexPA_unique.h"
@@ -157,6 +159,7 @@ class FlexPA
   bool isMacroCell(frInst* unique_inst);
 
   void deleteInst(frInst* inst);
+  void updateInst(odb::dbDatabase* db, odb::dbInst* db_inst);
 
   /**
    * @brief generates all access points of a single unique instance
@@ -182,6 +185,24 @@ class FlexPA
   int genPinAccess(T* pin, frInstTerm* inst_term = nullptr);
 
   /**
+   * @brief determines if the current access points are enough to say PA is done
+   * with this pin.
+   *
+   * for the access points to be considered enough there must exist a minimum of
+   * aps:
+   * 1. far enough from each other greater than the minimum specified in
+   * router_cfg.
+   * 2. far enough from the cell edge.
+   *
+   * @param aps the list of candidate access points
+   * @param inst_term terminal related to the pin
+   *
+   * @returns True if the current aps are enough for the pin
+   */
+  bool EnoughAccessPoints(std::vector<std::unique_ptr<frAccessPoint>>& aps,
+                          frInstTerm* inst_term);
+
+  /**
    * @brief initializes the pin accesses of a given pin only considering a given
    * cost for both the lower and upper layer.
    *
@@ -193,7 +214,7 @@ class FlexPA
    * @param lower_type lower layer access type
    * @param upper_type upper layer access type
    *
-   * @return if the initialization was sucessful
+   * @return if enough access points were found for the pin.
    */
   template <typename T>
   bool genPinAccessCostBounded(
