@@ -123,8 +123,9 @@ void FlexPA::deleteInst(frInst* inst)
 {
   const bool is_class_head = (inst == unique_insts_.getUnique(inst));
   // if inst is the class head the new head will be returned by deleteInst()
-  frInst* class_head = unique_insts_.deleteInst(inst);
   UniqueInsts::InstSet* unique_class = unique_insts_.getClass(inst);
+  frInst* class_head = unique_insts_.deleteInst(inst);
+
   // whole class has to be deleted
   if (!class_head) {
     unique_inst_patterns_.erase(inst);
@@ -164,7 +165,6 @@ void FlexPA::updateInst(frInst* inst)
 
 frInst* FlexPA::updateInst(odb::dbDatabase* db, odb::dbInst* db_inst)
 {
-  bool inst_already_solved = false;
   frInst* inst = design_->getTopBlock()->findInst(db_inst);
   if (!inst) {
     io::Parser parser(db, getDesign(), logger_, router_cfg_);
@@ -414,11 +414,20 @@ int FlexPA::main()
 void FlexPA::solveSingleInstancePA(odb::dbDatabase* db,
                                    std::set<odb::dbInst*> db_insts)
 {
-  std::set<frInst*> insts;
+  std::set<frInst*> updated_insts;
   for (odb::dbInst* db_inst : db_insts) {
-    insts.insert(updateInst(db, db_inst));
+    updated_insts.insert(updateInst(db, db_inst));
   }
-  std::vector<frInst*> inst_rows;
+  std::vector<std::vector<frInst*>> inst_rows = computeInstRows();
+  for (std::vector<frInst*> inst_row : inst_rows) {
+    for (frInst* inst : inst_row) {
+      if (updated_insts.find(inst) != updated_insts.end()) {
+        // logger_->report("[BNMFW] Solving some rows...");
+        genInstRowPattern(inst_row);
+        break;
+      }
+    }
+  }
 }
 
 template <class Archive>

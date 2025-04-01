@@ -972,7 +972,9 @@ std::vector<odb::Point> GlobalRouter::findOnGridPositions(
   // logger_->report("[BNMFW] {}", incremental_);
   if (incremental_) {
     if (pin.getITerm()) {
-      detailed_router_->solveSingleInstancePA(db_, pin.getITerm()->getInst());
+      std::set<odb::dbInst*> insts;
+      insts.insert(pin.getITerm()->getInst());
+      detailed_router_->solveSingleInstancePA(db_, insts);
     }
   }
 

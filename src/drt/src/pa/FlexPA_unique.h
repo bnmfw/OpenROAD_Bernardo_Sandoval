@@ -103,7 +103,6 @@ class UniqueInsts
 
   void report() const;
   void setDesign(frDesign* design) { design_ = design; }
-  void initUniqueInstPinAccess(frInst* unique_inst);
 
   bool incremental_ = false;
 
