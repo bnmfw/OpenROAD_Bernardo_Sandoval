@@ -231,6 +231,11 @@ void TritonRoute::solveSingleInstancePA(odb::dbDatabase* db,
   pa_->solveSingleInstancePA(db, db_insts);
 }
 
+bool TritonRoute::paExists()
+{
+  return (pa_ != nullptr);
+}
+
 void TritonRoute::debugSingleWorker(const std::string& dumpDir,
                                     const std::string& drcRpt)
 {

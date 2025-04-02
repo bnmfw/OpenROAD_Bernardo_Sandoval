@@ -1403,18 +1403,18 @@ void FlexPA::genInstAccessPoints(frInst* unique_inst)
 {
   ProfileTask profile("PA:uniqueInstance");
   for (auto& inst_term : unique_inst->getInstTerms()) {
-    if (incremental_)
-      logger_->report("[BNMFW] In inst terms");
+    // if (incremental_)
+    // logger_->report("[BNMFW] In inst terms");
     // only do for normal and clock terms
     if (isSkipInstTerm(inst_term.get())) {
       continue;
     }
-    if (incremental_)
-      logger_->report("[BNMFW] after skip");
+    // if (incremental_)
+    // logger_->report("[BNMFW] after skip");
     int n_aps = 0;
     for (auto& pin : inst_term->getTerm()->getPins()) {
-      if (incremental_)
-        logger_->report("[BNMFW] gen some pin access");
+      // if (incremental_)
+      // logger_->report("[BNMFW] gen some pin access");
       n_aps += genPinAccess(pin.get(), inst_term.get());
     }
     if (!n_aps) {

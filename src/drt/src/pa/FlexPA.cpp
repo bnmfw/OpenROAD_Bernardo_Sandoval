@@ -144,16 +144,21 @@ void FlexPA::updateInst(frInst* inst)
 {
   bool inst_already_solved = false;
   if (inst->hasPinAccessIdx()) {
+    // logger_->report("[BNMFW] has PA");
     if (unique_insts_.computeUniqueClass(inst)
         == *unique_insts_.getClass(inst)) {
       inst_already_solved = true;
     } else {
+      // logger_->report("[BNMFW] Deleting");
       deleteInst(inst);
     }
   }
+
   if (!inst_already_solved) {
+    // logger_->report("[BNMFW] Adding inst");
     const bool new_unique = unique_insts_.addInst(inst);
     if (new_unique) {
+      // logger_->report("[BNMFW] New unique");
       unique_insts_.initUniqueInstPinAccess(inst);
       initSkipInstTerm(inst);
       genInstAccessPoints(inst);
@@ -165,11 +170,15 @@ void FlexPA::updateInst(frInst* inst)
 
 frInst* FlexPA::updateInst(odb::dbDatabase* db, odb::dbInst* db_inst)
 {
+  // logger_->report("[BNMFW] Pre find");
   frInst* inst = design_->getTopBlock()->findInst(db_inst);
+  // logger_->report("[BNMFW] Post find");
   if (!inst) {
+    // logger_->report("[BNMFW] Parse");
     io::Parser parser(db, getDesign(), logger_, router_cfg_);
     inst = parser.setInst(db_inst);
   }
+  // logger_->report("[BNMFW] DRT update");
   updateInst(inst);
   return inst;
 }
@@ -414,15 +423,18 @@ int FlexPA::main()
 void FlexPA::solveSingleInstancePA(odb::dbDatabase* db,
                                    std::set<odb::dbInst*> db_insts)
 {
+  // Updates PA Data of every instance
   std::set<frInst*> updated_insts;
+  // // logger_->report("[BNMFW] Here solve");
   for (odb::dbInst* db_inst : db_insts) {
     updated_insts.insert(updateInst(db, db_inst));
   }
+
+  // Solves Rows that contain updated instances
   std::vector<std::vector<frInst*>> inst_rows = computeInstRows();
   for (std::vector<frInst*> inst_row : inst_rows) {
     for (frInst* inst : inst_row) {
       if (updated_insts.find(inst) != updated_insts.end()) {
-        // logger_->report("[BNMFW] Solving some rows...");
         genInstRowPattern(inst_row);
         break;
       }
