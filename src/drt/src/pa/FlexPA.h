@@ -61,6 +61,20 @@ namespace drt {
 using ViaRawPriorityTuple
     = std::tuple<bool, frCoord, frCoord, bool, frCoord, frCoord, bool>;
 
+struct frInstLocationComp
+{
+  bool operator()(const frInst* lhs, const frInst* rhs) const
+  {
+    Point lp = lhs->getOrigin(), rp = rhs->getOrigin();
+    if (lp.getY() != rp.getY()) {
+      return lp.getY() < rp.getY();
+    }
+    return lp.getX() < rp.getX();
+  }
+};
+
+using frInstLocationSet = std::set<frInst*, frInstLocationComp>;
+
 class FlexPinAccessPattern;
 class FlexDPNode;
 class AbstractPAGraphics;
@@ -127,6 +141,7 @@ class FlexPA
            std::map<int, std::map<ViaRawPriorityTuple, const frViaDef*>>>
       layer_num_to_via_defs_;
   frCollection<odb::dbInst*> target_insts_;
+  frInstLocationSet insts_set_;
 
   std::string remote_host_;
   uint16_t remote_port_ = -1;
@@ -765,7 +780,10 @@ class FlexPA
       PatternType pattern_type,
       std::set<frBlockObject*>* owners = nullptr);
 
-  void getInsts(std::vector<frInst*>& insts);
+  /**
+   * @brief populates the insts_set_ data structure
+   */
+  void buildInstsSet();
 
   /**
    * @brief organizes all the insts in a vector of clusters, each cluster being
@@ -774,6 +792,23 @@ class FlexPA
    * @returns the vector of vectors of insts
    */
   std::vector<std::vector<frInst*>> computeInstRows();
+
+  /**
+   * @brief Get the instance adjacent to the left or right of a given instance
+   *
+   * @param inst the reference inst
+   * @param left true if looking at the left inst, false if looking at the right
+   *
+   * @returns the adjacent inst or nullptr if no adjacent inst
+   */
+  frInst* getAdjacentInstance(frInst* inst, bool left) const;
+
+  /**
+   * @brief Find a cluster of instances that are touching each other
+   *
+   * @returns a vector of the clusters of touching insts
+   */
+  std::vector<frInst*> getAdjacentInstancesCluster(frInst* inst) const;
 
   void prepPatternInstRows(std::vector<std::vector<frInst*>> inst_rows);
 

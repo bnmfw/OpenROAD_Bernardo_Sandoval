@@ -62,26 +62,15 @@ static inline void serializeInstRows(
 std::vector<std::vector<frInst*>> FlexPA::computeInstRows()
 {
   // prep pattern for each row
-  std::vector<frInst*> insts;
   std::vector<std::vector<frInst*>> inst_rows;
   std::vector<frInst*> row_insts;
 
-  auto instLocComp = [](frInst* const& a, frInst* const& b) {
-    const Point originA = a->getOrigin();
-    const Point originB = b->getOrigin();
-    if (originA.y() == originB.y()) {
-      return (originA.x() < originB.x());
-    }
-    return (originA.y() < originB.y());
-  };
-
-  getInsts(insts);
-  std::sort(insts.begin(), insts.end(), instLocComp);
+  buildInstsSet();
 
   // gen rows of insts
   int prev_y_coord = INT_MIN;
   int prev_x_end_coord = INT_MIN;
-  for (auto inst : insts) {
+  for (auto inst : insts_set_) {
     Point origin = inst->getOrigin();
     if (origin.y() != prev_y_coord || origin.x() > prev_x_end_coord) {
       if (!row_insts.empty()) {
@@ -98,6 +87,60 @@ std::vector<std::vector<frInst*>> FlexPA::computeInstRows()
     inst_rows.push_back(row_insts);
   }
   return inst_rows;
+}
+
+frInst* FlexPA::getAdjacentInstance(frInst* inst, bool left) const
+{
+  frInst* adjacent_inst = nullptr;
+  frInst* left_inst = nullptr;
+  frInst* right_inst = nullptr;
+  auto inst_it = insts_set_.find(inst);
+  if (left && inst_it != insts_set_.begin()) {
+    adjacent_inst = *std::prev(inst_it);
+    left_inst = adjacent_inst;
+    right_inst = inst;
+  } else if (inst_it != insts_set_.end()) {
+    adjacent_inst = *std::next(inst_it);
+    left_inst = inst;
+    right_inst = adjacent_inst;
+  } else {
+    return nullptr;
+  }
+
+  if (left_inst->getBoundaryBBox().xMax() != right_inst->getOrigin().getX()) {
+    return nullptr;
+  }
+
+  if (left_inst->getOrigin().getY() != right_inst->getOrigin().getY()) {
+    return nullptr;
+  }
+  return adjacent_inst;
+}
+
+std::vector<frInst*> FlexPA::getAdjacentInstancesCluster(frInst* inst) const
+{
+  const bool left = true;
+  const bool right = false;
+  std::vector<frInst*> adj_inst_cluster;
+
+  frInst* left_inst = getAdjacentInstance(inst, left);
+  while (left_inst != nullptr) {
+    adj_inst_cluster.push_back(left_inst);
+    // the right instance can be ignored, since it was added in the line above
+    left_inst = getAdjacentInstance(left_inst, left);
+  }
+
+  std::reverse(adj_inst_cluster.begin(), adj_inst_cluster.end());
+  adj_inst_cluster.push_back(inst);
+
+  frInst* right_inst = getAdjacentInstance(inst, right);
+  while (right_inst != nullptr) {
+    adj_inst_cluster.push_back(right_inst);
+    // the left instance can be ignored, since it was added in the line above
+    right_inst = getAdjacentInstance(right_inst, right);
+  }
+
+  return adj_inst_cluster;
 }
 
 void FlexPA::prepPatternInstRows(std::vector<std::vector<frInst*>> inst_rows)
