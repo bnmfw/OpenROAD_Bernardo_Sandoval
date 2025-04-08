@@ -344,6 +344,16 @@ bool FlexPA::isSkipInstTerm(frInstTerm* in)
   return skip_unique_inst_term_.at({inst_class, in->getTerm()});
 }
 
+bool FlexPA::skipAllInstTerms(frInst* inst)
+{
+  for (auto& inst_term : inst->getInstTerms()) {
+    if (!isSkipInstTerm(inst_term.get())) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // TODO there should be a better way to get this info by getting the master
 // terms from OpenDB
 bool FlexPA::isStdCell(frInst* inst)
@@ -414,47 +424,17 @@ int FlexPA::main()
 
 void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
 {
-  bool showme = "ANTENNA_3" == db_inst->getName();
-
-  // Updates PA Data of every instance
   std::set<frInst*> updated_insts;
-  // logger_->report("[BNMFW] {}", db_inst->getName());
   frInst* inst = updateInst(db, db_inst);
 
-  bool is_skip = true;
-  for (auto& inst_term : inst->getInstTerms()) {
-    if (!isSkipInstTerm(inst_term.get())) {
-      is_skip = false;
-      break;
-    }
-  }
-  if (is_skip) {
+  if (skipAllInstTerms(inst)) {
     return;
   }
 
-  // Solves Rows that contain updated instances
+  // TODO: Instances have to be deleted and included along moves
   buildInstsSet();
   std::vector<frInst*> inst_row = getAdjacentInstancesCluster(inst);
-  std::string names = "";
-  for (frInst* inst : inst_row) {
-    names += inst->getName() + " ";
-  }
-  if (showme)
-    logger_->report("[BNMFW] Row: {}", names);
   genInstRowPattern(inst_row);
-
-  // std::vector<std::vector<frInst*>> inst_rows = computeInstRows();
-  // for (std::vector<frInst*> inst_row : inst_rows) {
-  //   std::string names = "";
-  //   for (frInst* this_inst : inst_row) {
-  //     names += this_inst->getName() + " ";
-  //     if (this_inst == inst) {
-  //       // logger_->report("[BNMFW] Row: {}", names);
-  //       genInstRowPattern(inst_row);
-  //       break;
-  //     }
-  //   }
-  // }
 }
 
 template <class Archive>
