@@ -397,7 +397,6 @@ std::vector<dbInst*> Opendp::getAdjacentInstancesCluster(dbInst* inst) const
 
   dbInst* left_inst = getAdjacentInstance(inst, left);
   while (left_inst != nullptr) {
-    // logger_->report("[BNMFW] left inst = {}", left_inst->getName());
     adj_inst_cluster.push_back(left_inst);
     // the right instance can be ignored, since it was added in the line above
     left_inst = getAdjacentInstance(left_inst, left);

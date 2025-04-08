@@ -226,9 +226,9 @@ std::string TritonRoute::runDRWorker(const std::string& workerStr,
 }
 
 void TritonRoute::solveSingleInstancePA(odb::dbDatabase* db,
-                                        std::set<odb::dbInst*> db_insts)
+                                        odb::dbInst* db_inst)
 {
-  pa_->solveSingleInstancePA(db, db_insts);
+  pa_->solveSingleInstancePA(db, db_inst);
 }
 
 bool TritonRoute::paExists()

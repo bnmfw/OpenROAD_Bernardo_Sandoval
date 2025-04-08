@@ -144,21 +144,17 @@ void FlexPA::updateInst(frInst* inst)
 {
   bool inst_already_solved = false;
   if (inst->hasPinAccessIdx()) {
-    // logger_->report("[BNMFW] has PA");
     if (unique_insts_.computeUniqueClass(inst)
         == *unique_insts_.getClass(inst)) {
       inst_already_solved = true;
     } else {
-      // logger_->report("[BNMFW] Deleting");
       deleteInst(inst);
     }
   }
 
   if (!inst_already_solved) {
-    // logger_->report("[BNMFW] Adding inst");
     const bool new_unique = unique_insts_.addInst(inst);
     if (new_unique) {
-      // logger_->report("[BNMFW] New unique");
       unique_insts_.initUniqueInstPinAccess(inst);
       initSkipInstTerm(inst);
       genInstAccessPoints(inst);
@@ -170,15 +166,11 @@ void FlexPA::updateInst(frInst* inst)
 
 frInst* FlexPA::updateInst(odb::dbDatabase* db, odb::dbInst* db_inst)
 {
-  // logger_->report("[BNMFW] Pre find");
   frInst* inst = design_->getTopBlock()->findInst(db_inst);
-  // logger_->report("[BNMFW] Post find");
   if (!inst) {
-    // logger_->report("[BNMFW] Parse");
     io::Parser parser(db, getDesign(), logger_, router_cfg_);
     inst = parser.setInst(db_inst);
   }
-  // logger_->report("[BNMFW] DRT update");
   updateInst(inst);
   return inst;
 }
@@ -420,26 +412,49 @@ int FlexPA::main()
   return 0;
 }
 
-void FlexPA::solveSingleInstancePA(odb::dbDatabase* db,
-                                   std::set<odb::dbInst*> db_insts)
+void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
 {
+  bool showme = "ANTENNA_3" == db_inst->getName();
+
   // Updates PA Data of every instance
   std::set<frInst*> updated_insts;
-  // // logger_->report("[BNMFW] Here solve");
-  for (odb::dbInst* db_inst : db_insts) {
-    updated_insts.insert(updateInst(db, db_inst));
+  // logger_->report("[BNMFW] {}", db_inst->getName());
+  frInst* inst = updateInst(db, db_inst);
+
+  bool is_skip = true;
+  for (auto& inst_term : inst->getInstTerms()) {
+    if (!isSkipInstTerm(inst_term.get())) {
+      is_skip = false;
+      break;
+    }
+  }
+  if (is_skip) {
+    return;
   }
 
   // Solves Rows that contain updated instances
-  std::vector<std::vector<frInst*>> inst_rows = computeInstRows();
-  for (std::vector<frInst*> inst_row : inst_rows) {
-    for (frInst* inst : inst_row) {
-      if (updated_insts.find(inst) != updated_insts.end()) {
-        genInstRowPattern(inst_row);
-        break;
-      }
-    }
+  buildInstsSet();
+  std::vector<frInst*> inst_row = getAdjacentInstancesCluster(inst);
+  std::string names = "";
+  for (frInst* inst : inst_row) {
+    names += inst->getName() + " ";
   }
+  if (showme)
+    logger_->report("[BNMFW] Row: {}", names);
+  genInstRowPattern(inst_row);
+
+  // std::vector<std::vector<frInst*>> inst_rows = computeInstRows();
+  // for (std::vector<frInst*> inst_row : inst_rows) {
+  //   std::string names = "";
+  //   for (frInst* this_inst : inst_row) {
+  //     names += this_inst->getName() + " ";
+  //     if (this_inst == inst) {
+  //       // logger_->report("[BNMFW] Row: {}", names);
+  //       genInstRowPattern(inst_row);
+  //       break;
+  //     }
+  //   }
+  // }
 }
 
 template <class Archive>

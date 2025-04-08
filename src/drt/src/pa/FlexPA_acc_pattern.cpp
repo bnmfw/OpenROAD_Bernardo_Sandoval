@@ -107,19 +107,13 @@ void FlexPA::prepPatternInst(frInst* unique_inst)
 // the input inst must be unique instance
 int FlexPA::prepPatternInstHelper(frInst* unique_inst, const bool use_x)
 {
-  // if (incremental_)
-  // logger_->report("[BNMFW] Pattern Helper");
   std::vector<std::pair<frCoord, std::pair<frMPin*, frInstTerm*>>> pins;
   // TODO: add assert in case input inst is not unique inst
   int pin_access_idx = unique_inst->getPinAccessIdx();
-  // if (incremental_)
-  // logger_->report("[BNMFW] After get PA index");
   for (auto& inst_term : unique_inst->getInstTerms()) {
     if (isSkipInstTerm(inst_term.get())) {
       continue;
     }
-    // if (incremental_)
-    // logger_->report("[BNMFW] After Inst Term");
     int n_aps = 0;
     for (auto& pin : inst_term->getTerm()->getPins()) {
       // container of access points

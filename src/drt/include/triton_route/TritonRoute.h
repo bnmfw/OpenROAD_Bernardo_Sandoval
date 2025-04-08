@@ -206,8 +206,7 @@ class TritonRoute
   void prep();
   odb::dbDatabase* getDb() const { return db_; }
   void fixMaxSpacing(int num_threads);
-  void solveSingleInstancePA(odb::dbDatabase* db,
-                             std::set<odb::dbInst*> db_inst);
+  void solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst);
   bool paExists();
 
  private:
