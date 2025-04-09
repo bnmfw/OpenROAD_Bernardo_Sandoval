@@ -2442,7 +2442,7 @@ bool IOPlacer::checkPinConstraints()
               PPL,
               105,
               "Pin {} is not placed in the upper layer grid region ({:.2f}um, "
-              "{:.2f}um) ({:.2f}um, {:.2f}um). ({:.2f}um, {:.2f}um, )",
+              "{:.2f}um) ({:.2f}um, {:.2f}um). ({:.2f}um, {:.2f}um)",
               pin.getName(),
               getBlock()->dbuToMicrons(constraint.box.xMin()),
               getBlock()->dbuToMicrons(constraint.box.yMin()),
@@ -2642,12 +2642,18 @@ void IOPlacer::placePin(odb::dbBTerm* bterm,
 
   excludeInterval(interval);
 
-  logger_->info(PPL,
-                70,
-                "Pin {} placed at ({:.2f}um, {:.2f}um).",
-                bterm->getName(),
-                getBlock()->dbuToMicrons(pos.x()),
-                getBlock()->dbuToMicrons(pos.y()));
+  if (pos != Point(x, y)) {
+    logger_->info(PPL,
+                  70,
+                  "Pin {} placed at ({:.2f}um, {:.2f}um) instead of ({:.2f}um, "
+                  "{:.2f}um). Pin was snapped to a routing track, to the "
+                  "manufacturing grid or moved away from blocked region.",
+                  bterm->getName(),
+                  getBlock()->dbuToMicrons(pos.x()),
+                  getBlock()->dbuToMicrons(pos.y()),
+                  getBlock()->dbuToMicrons(x),
+                  getBlock()->dbuToMicrons(y));
+  }
 }
 
 void IOPlacer::movePinToTrack(odb::Point& pos,
