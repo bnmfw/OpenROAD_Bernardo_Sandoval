@@ -203,6 +203,7 @@ std::string TritonRoute::runDRWorker(const std::string& workerStr,
 void TritonRoute::solveSingleInstancePA(odb::dbDatabase* db,
                                         odb::dbInst* db_inst)
 {
+  router_cfg_->DO_PA = false;
   pa_->solveSingleInstancePA(db, db_inst);
 }
 
