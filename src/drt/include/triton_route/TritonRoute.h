@@ -38,6 +38,7 @@ class Distributed;
 namespace drt {
 
 class frDesign;
+class frInst;
 class DesignCallBack;
 class FlexDR;
 class FlexPA;
@@ -176,6 +177,8 @@ class TritonRoute
   odb::dbDatabase* getDb() const { return db_; }
   void fixMaxSpacing(int num_threads);
   void solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst);
+  void deleteInstancePAData(frInst* inst);
+  void addInstancePAData(frInst* inst);
   bool paExists();
 
  private:

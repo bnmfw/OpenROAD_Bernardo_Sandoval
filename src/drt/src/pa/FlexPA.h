@@ -73,6 +73,11 @@ class FlexPA
                       int cloud_sz);
 
   void solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst);
+  void addInst(frInst* inst);
+  void deleteInst(frInst* inst);
+  void updateInst(frInst* inst);
+  frInst* updateInst(odb::dbDatabase* db, odb::dbInst* db_inst);
+
   int main();
 
  private:
@@ -141,10 +146,6 @@ class FlexPA
 
   bool isStdCell(frInst* unique_inst);
   bool isMacroCell(frInst* unique_inst);
-
-  void deleteInst(frInst* inst);
-  void updateInst(frInst* inst);
-  frInst* updateInst(odb::dbDatabase* db, odb::dbInst* db_inst);
 
   /**
    * @brief generates all access points of a single unique instance

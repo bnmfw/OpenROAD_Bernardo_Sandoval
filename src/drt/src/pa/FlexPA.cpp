@@ -91,6 +91,19 @@ void FlexPA::init()
   initAllSkipInstTerm();
 }
 
+void FlexPA::addInst(frInst* inst)
+{
+  const bool new_unique = unique_insts_.addInst(inst);
+  if (new_unique) {
+    unique_insts_.initUniqueInstPinAccess(inst);
+    initSkipInstTerm(inst);
+    genInstAccessPoints(inst);
+    prepPatternInst(inst);
+  }
+  inst->setPinAccessIdx(unique_insts_.getUnique(inst)->getPinAccessIdx());
+  insts_set_.insert(inst);
+}
+
 void FlexPA::deleteInst(frInst* inst)
 {
   const bool is_class_head = (inst == unique_insts_.getUnique(inst));
@@ -110,6 +123,7 @@ void FlexPA::deleteInst(frInst* inst)
     unique_inst_patterns_[class_head] = std::move(unique_inst_patterns_[inst]);
     unique_inst_patterns_.erase(inst);
   }
+  insts_set_.erase(inst);
 }
 
 void FlexPA::updateInst(frInst* inst)
@@ -126,7 +140,13 @@ void FlexPA::updateInst(frInst* inst)
 
   // This is necessary, if the inst was moved its position on the set is wrong,
   // it has to be erased and inserted back again to be in the right position
-  insts_set_.erase(inst);
+  for (auto it = insts_set_.begin(); it != insts_set_.end(); ++it) {
+    if (*it == inst) {
+      insts_set_.erase(it);
+      break;
+    }
+  }
+
   insts_set_.insert(inst);
 
   if (!inst_already_solved) {

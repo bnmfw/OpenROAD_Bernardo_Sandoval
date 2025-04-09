@@ -1065,6 +1065,16 @@ void TritonRoute::pinAccess(const std::vector<odb::dbInst*>& target_insts)
   writer.updateDb(db_, router_cfg_.get(), true);
 }
 
+void TritonRoute::deleteInstancePAData(frInst* inst)
+{
+  pa_->deleteInst(inst);
+}
+
+void TritonRoute::addInstancePAData(frInst* inst)
+{
+  pa_->addInst(inst);
+}
+
 void TritonRoute::fixMaxSpacing(int num_threads)
 {
   initDesign();
