@@ -937,7 +937,6 @@ std::vector<odb::Point> GlobalRouter::findOnGridPositions(
   // temporarily ignore odb access points when incremental changes
   // are made, in order to avoid getting invalid APs
   // TODO: remove the !incremental_ flag and update APs incrementally in odb
-  // // logger_->report("[BNMFW] {}", incremental_);
   if (incremental_ && detailed_router_ && detailed_router_->paExists()) {
     if (pin.getITerm()) {
       detailed_router_->solveSingleInstancePA(db_, pin.getITerm()->getInst());

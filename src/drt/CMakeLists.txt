@@ -116,7 +116,6 @@ target_link_libraries(drt_lib
     utl_lib
     dst
     dbSta_lib
-    dpl_lib
     Threads::Threads
     OpenMP::OpenMP_CXX
     ${Boost_LIBRARIES}
