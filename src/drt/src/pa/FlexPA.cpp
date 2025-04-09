@@ -21,7 +21,6 @@
 #include "distributed/PinAccessJobDescription.h"
 #include "distributed/frArchive.h"
 #include "distributed/paUpdate.h"
-#include "dpl/Opendp.h"
 #include "dst/Distributed.h"
 #include "dst/JobMessage.h"
 #include "frProfileTask.h"
@@ -52,14 +51,12 @@ static inline void serializePatterns(
 FlexPA::FlexPA(frDesign* in,
                Logger* logger,
                dst::Distributed* dist,
-               RouterConfiguration* router_cfg,
-               dpl::Opendp* opendp)
+               RouterConfiguration* router_cfg)
     : design_(in),
       logger_(logger),
       dist_(dist),
       router_cfg_(router_cfg),
-      unique_insts_(design_, target_insts_, logger_, router_cfg),
-      opendp_(opendp)
+      unique_insts_(design_, target_insts_, logger_, router_cfg)
 {
 }
 
