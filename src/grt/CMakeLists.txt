@@ -40,7 +40,6 @@ target_link_libraries(grt_lib
     dbSta_lib
     stt_lib
     rsz_lib
-    drt_lib
     OpenSTA
     Boost::boost
     OpenMP::OpenMP_CXX

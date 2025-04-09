@@ -101,7 +101,13 @@ void FlexPA::addInst(frInst* inst)
     prepPatternInst(inst);
   }
   inst->setPinAccessIdx(unique_insts_.getUnique(inst)->getPinAccessIdx());
+
   insts_set_.insert(inst);
+  if (skipAllInstTerms(inst)) {
+    return;
+  }
+  std::vector<frInst*> inst_row = getAdjacentInstancesCluster(inst);
+  genInstRowPattern(inst_row);
 }
 
 void FlexPA::deleteInst(frInst* inst)
@@ -128,11 +134,9 @@ void FlexPA::deleteInst(frInst* inst)
 
 void FlexPA::updateInst(frInst* inst)
 {
-  bool inst_already_solved = false;
   if (inst->hasPinAccessIdx()) {
     if (unique_insts_.computeUniqueClass(inst)
         == *unique_insts_.getClass(inst)) {
-      inst_already_solved = true;
     } else {
       deleteInst(inst);
     }
@@ -149,16 +153,7 @@ void FlexPA::updateInst(frInst* inst)
 
   insts_set_.insert(inst);
 
-  if (!inst_already_solved) {
-    const bool new_unique = unique_insts_.addInst(inst);
-    if (new_unique) {
-      unique_insts_.initUniqueInstPinAccess(inst);
-      initSkipInstTerm(inst);
-      genInstAccessPoints(inst);
-      prepPatternInst(inst);
-    }
-    inst->setPinAccessIdx(unique_insts_.getUnique(inst)->getPinAccessIdx());
-  }
+  addInst(inst);
 }
 
 frInst* FlexPA::updateInst(odb::dbDatabase* db, odb::dbInst* db_inst)
@@ -417,19 +412,6 @@ int FlexPA::main()
     t.print(logger_);
   }
   return 0;
-}
-
-void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
-{
-  std::set<frInst*> updated_insts;
-  frInst* inst = updateInst(db, db_inst);
-
-  if (skipAllInstTerms(inst)) {
-    return;
-  }
-
-  std::vector<frInst*> inst_row = getAdjacentInstancesCluster(inst);
-  genInstRowPattern(inst_row);
 }
 
 template <class Archive>

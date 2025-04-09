@@ -45,7 +45,6 @@ void initGlobalRouter(OpenRoad* openroad)
       openroad->getResizer(),
       openroad->getAntennaChecker(),
       openroad->getOpendp(),
-      openroad->getTritonRoute(),
       std::make_unique<grt::RoutingCongestionDataSource>(openroad->getLogger(),
                                                          openroad->getDb()),
       std::make_unique<grt::RUDYDataSource>(openroad->getLogger(),

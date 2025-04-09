@@ -200,18 +200,6 @@ std::string TritonRoute::runDRWorker(const std::string& workerStr,
   return result;
 }
 
-void TritonRoute::solveSingleInstancePA(odb::dbDatabase* db,
-                                        odb::dbInst* db_inst)
-{
-  router_cfg_->DO_PA = false;
-  pa_->solveSingleInstancePA(db, db_inst);
-}
-
-bool TritonRoute::paExists()
-{
-  return (pa_ != nullptr);
-}
-
 void TritonRoute::debugSingleWorker(const std::string& dumpDir,
                                     const std::string& drcRpt)
 {
@@ -1067,12 +1055,16 @@ void TritonRoute::pinAccess(const std::vector<odb::dbInst*>& target_insts)
 
 void TritonRoute::deleteInstancePAData(frInst* inst)
 {
-  pa_->deleteInst(inst);
+  if (pa_) {
+    pa_->deleteInst(inst);
+  }
 }
 
 void TritonRoute::addInstancePAData(frInst* inst)
 {
-  pa_->addInst(inst);
+  if (pa_) {
+    pa_->addInst(inst);
+  }
 }
 
 void TritonRoute::fixMaxSpacing(int num_threads)

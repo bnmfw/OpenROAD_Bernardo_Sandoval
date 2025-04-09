@@ -72,7 +72,6 @@ class FlexPA
                       const std::string& shared_vol,
                       int cloud_sz);
 
-  void solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst);
   void addInst(frInst* inst);
   void deleteInst(frInst* inst);
   void updateInst(frInst* inst);

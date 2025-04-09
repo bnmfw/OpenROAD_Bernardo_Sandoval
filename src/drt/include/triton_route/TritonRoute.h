@@ -176,10 +176,8 @@ class TritonRoute
   void prep();
   odb::dbDatabase* getDb() const { return db_; }
   void fixMaxSpacing(int num_threads);
-  void solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst);
   void deleteInstancePAData(frInst* inst);
   void addInstancePAData(frInst* inst);
-  bool paExists();
 
  private:
   std::unique_ptr<frDesign> design_;
