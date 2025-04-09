@@ -152,6 +152,11 @@ void FlexPA::updateInst(frInst* inst)
     }
   }
 
+  // This is necessary, if the inst was moved its position on the set is wrong,
+  // it has to be erased and inserted back again to be in the right position
+  insts_set_.erase(inst);
+  insts_set_.insert(inst);
+
   if (!inst_already_solved) {
     const bool new_unique = unique_insts_.addInst(inst);
     if (new_unique) {
@@ -431,8 +436,6 @@ void FlexPA::solveSingleInstancePA(odb::dbDatabase* db, odb::dbInst* db_inst)
     return;
   }
 
-  // TODO: Instances have to be deleted and included along moves
-  buildInstsSet();
   std::vector<frInst*> inst_row = getAdjacentInstancesCluster(inst);
   genInstRowPattern(inst_row);
 }
