@@ -6,7 +6,12 @@
 #include <boost/polygon/polygon.hpp>
 #include <boost/serialization/unordered_map.hpp>
 #include <cstdint>
+#include <limits>
+#include <map>
+#include <memory>
+#include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -28,7 +33,7 @@ class access;
 
 namespace drt {
 // not default via, upperWidth, lowerWidth, not align upper, upperArea,
-// lowerArea, not align lower, via name
+// lowerArea, not align lower
 using ViaRawPriorityTuple
     = std::tuple<bool, frCoord, frCoord, bool, frCoord, frCoord, bool>;
 
@@ -36,7 +41,7 @@ struct frInstLocationComp
 {
   bool operator()(const frInst* lhs, const frInst* rhs) const
   {
-    Point lp = lhs->getOrigin(), rp = rhs->getOrigin();
+    Point lp = lhs->getBoundaryBBox().ll(), rp = rhs->getBoundaryBBox().ll();
     if (lp.getY() != rp.getY()) {
       return lp.getY() < rp.getY();
     }
@@ -326,6 +331,12 @@ class FlexPA
                      frLayerNum layer_num,
                      frCoord low,
                      frCoord high);
+
+  void genViaEnclosedCoords(std::map<frCoord, frAccessPointEnum>& coords,
+                            const gtl::rectangle_data<frCoord>& rect,
+                            const frViaDef* via_def,
+                            frLayerNum layer_num,
+                            bool is_curr_layer_horz);
 
   /**
    * @brief Generates an Enclosed Boundary access point
@@ -690,6 +701,7 @@ class FlexPA
    * @brief Extracts the access patterns given the graph nodes composing the
    * access points relationship
    *
+   * @param inst instance
    * @param nodes {pin,access_point} nodes of the access pattern graph
    * @param pins vector of pins of the unique instance
    * @param used_access_points a set of all used access points
@@ -698,6 +710,7 @@ class FlexPA
    * access_pattern[pin_idx] = access_point_idx of the pin
    */
   std::vector<int> extractAccessPatternFromNodes(
+      frInst* inst,
       const std::vector<std::vector<std::unique_ptr<FlexDPNode>>>& nodes,
       const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
       std::set<std::pair<int, int>>& used_access_points);
@@ -762,17 +775,14 @@ class FlexPA
   std::vector<std::vector<frInst*>> computeInstRows();
 
   /**
-   * @brief Get the instance adjacent to the left or right of a given instance
+   * @brief Verifies if both instances are abuting
    *
-   * @param inst the reference inst
-   * @param left true if looking at the left inst, false if looking at the right
-   *
-   * @returns the adjacent inst or nullptr if no adjacent inst
+   * @returns true if the instances abute
    */
-  frInst* getAdjacentInstance(frInst* inst, bool left) const;
+  bool instancesAreAbuting(frInst* inst_1, frInst* inst_2) const;
 
   /**
-   * @brief Find a cluster of instances that are touching each other
+   * @brief Find a cluster of instances that are touching the passed instance
    *
    * @returns a vector of the clusters of touching insts
    */

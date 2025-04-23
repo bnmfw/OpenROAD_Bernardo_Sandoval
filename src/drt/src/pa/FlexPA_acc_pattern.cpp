@@ -3,11 +3,19 @@
 
 #include <omp.h>
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <fstream>
 #include <iostream>
+#include <limits>
+#include <map>
+#include <memory>
+#include <set>
 #include <sstream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "AbstractPAGraphics.h"
 #include "FlexPA.h"
@@ -102,7 +110,11 @@ int FlexPA::prepPatternInstHelper(frInst* unique_inst, const bool use_x)
       }
     }
     if (n_aps == 0 && !inst_term->getTerm()->getPins().empty()) {
-      logger_->error(DRT, 86, "Pin does not have an access point.");
+      logger_->error(DRT,
+                     86,
+                     "Term {} ({}) does not have any access point.",
+                     inst_term->getName(),
+                     unique_inst->getMaster()->getName());
     }
   }
   std::sort(pins.begin(),
@@ -329,7 +341,6 @@ bool FlexPA::genPatternsGC(
   }
   design_rule_checker.initPA1();
   design_rule_checker.main();
-  design_rule_checker.end();
 
   const bool no_drv = design_rule_checker.getMarkers().empty();
   if (owners) {
@@ -522,6 +533,7 @@ int FlexPA::getEdgeCost(
 }
 
 std::vector<int> FlexPA::extractAccessPatternFromNodes(
+    frInst* inst,
     const std::vector<std::vector<std::unique_ptr<FlexDPNode>>>& nodes,
     const std::vector<std::pair<frMPin*, frInstTerm*>>& pins,
     std::set<std::pair<int, int>>& used_access_points)
@@ -535,7 +547,11 @@ std::vector<int> FlexPA::extractAccessPatternFromNodes(
 
   while (curr_node != source_node) {
     if (!curr_node) {
-      logger_->error(DRT, 90, "Valid access pattern not found.");
+      logger_->error(DRT,
+                     90,
+                     "Valid access pattern not found for inst {}({}).",
+                     inst->getName(),
+                     inst->getMaster()->getName());
     }
 
     auto [curr_pin_idx, curr_acc_point_idx] = curr_node->getIdx();
@@ -557,8 +573,8 @@ bool FlexPA::genPatternsCommit(
     std::set<std::pair<int, int>>& viol_access_points,
     const int max_access_point_size)
 {
-  std::vector<int> access_pattern
-      = extractAccessPatternFromNodes(nodes, pins, used_access_points);
+  std::vector<int> access_pattern = extractAccessPatternFromNodes(
+      unique_inst, nodes, pins, used_access_points);
   // not a new access pattern
   if (inst_access_patterns.find(access_pattern) != inst_access_patterns.end()) {
     return false;
