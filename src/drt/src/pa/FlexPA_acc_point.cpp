@@ -825,7 +825,7 @@ void FlexPA::filterViaAccess(
   const int max_num_via_trial = 2;
   // use std:pair to ensure deterministic behavior
   std::vector<std::pair<int, const frViaDef*>> via_defs;
-  getViasFromMetalWidthMap(begin_point, layer_num, polyset, via_defs);
+  // getViasFromMetalWidthMap(begin_point, layer_num, polyset, via_defs);
 
   if (via_defs.empty()) {  // no via map entry
     // hardcode first two single vias
