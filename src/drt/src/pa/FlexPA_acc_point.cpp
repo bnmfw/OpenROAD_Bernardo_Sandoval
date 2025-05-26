@@ -323,6 +323,7 @@ void FlexPA::createMultipleAccessPoints(
     allow_planar = true;
     allow_via = false;
   }
+  const int aps_size_before = aps.size();
   // build points;
   for (auto& [x_coord, cost_x] : x_coords) {
     for (auto& [y_coord, cost_y] : y_coords) {
@@ -343,13 +344,14 @@ void FlexPA::createMultipleAccessPoints(
       }
     }
   }
+  const int new_aps_size = aps.size() - aps_size_before;
   if (inst_term && isStdCell(inst_term->getInst())) {
 #pragma omp atomic
-    std_cell_pin_gen_ap_cnt_ += aps.size();
+    std_cell_pin_gen_ap_cnt_ += new_aps_size;
   }
   if (inst_term && isMacroCell(inst_term->getInst())) {
 #pragma omp atomic
-    macro_cell_pin_gen_ap_cnt_ += aps.size();
+    macro_cell_pin_gen_ap_cnt_ += new_aps_size;
   }
 }
 
@@ -494,8 +496,7 @@ void FlexPA::genAccessCoordsFromLayerShapes(
     const frAccessPointEnum upper_type)
 {
   // IO term is treated as the MacroCellPin as the top block
-  bool is_macro_cell_pin
-      = inst_term ? isMacroCell(inst_term->getInst()) : false;
+  bool is_macro_cell_pin = inst_term ? isMacroCell(inst_term->getInst()) : true;
 
   std::vector<gtl::rectangle_data<frCoord>> maxrects;
   gtl::get_max_rectangles(maxrects, layer_shapes);
