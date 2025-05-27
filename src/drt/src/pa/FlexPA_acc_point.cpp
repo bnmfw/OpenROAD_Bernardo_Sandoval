@@ -368,6 +368,10 @@ void FlexPA::genAccessCoordsFromRect(
     const frAccessPointEnum upper_type,
     const bool is_macro_cell_pin)
 {
+  if (OnlyAllowOnGridAccess(layer_num, is_macro_cell_pin)
+      && upper_type != frAccessPointEnum::OnGrid) {
+    return;
+  }
   frLayer* layer = getDesign()->getTech()->getLayer(layer_num);
   const auto min_width_layer1 = layer->getMinWidth();
   if (std::min(gtl::delta(rect, gtl::HORIZONTAL),
@@ -421,10 +425,6 @@ void FlexPA::genAccessCoordsFromRect(
                                           frAccessPointEnum::NearbyGrid};
 
   for (const auto cost : frDirEnums) {
-    if (OnlyAllowOnGridAccess(layer_num, is_macro_cell_pin)
-        && cost != frAccessPointEnum::OnGrid) {
-      return;
-    }
     if (upper_type >= cost) {
       genAccessCoordCosted(cost,
                            layer2_coords,
@@ -457,22 +457,6 @@ void FlexPA::genAccessCoordsFromRect(
 
 bool FlexPA::OnlyAllowOnGridAccess(const frLayerNum layer_num,
                                    const bool is_macro_cell_pin)
-{
-  // lower layer is current layer
-  // rightway on grid only forbid off track up via access on upper layer
-  const auto upper_layer
-      = (layer_num + 2 <= getDesign()->getTech()->getTopLayerNum())
-            ? getDesign()->getTech()->getLayer(layer_num + 2)
-            : nullptr;
-  if (!is_macro_cell_pin && upper_layer
-      && upper_layer->getLef58RightWayOnGridOnlyConstraint()) {
-    return true;
-  }
-  return false;
-}
-
-bool FlexPA::isUpperLayerOnGridOnly(const frLayerNum layer_num,
-                                    const bool is_macro_cell_pin)
 {
   // lower layer is current layer
   // rightway on grid only forbid off track up via access on upper layer
