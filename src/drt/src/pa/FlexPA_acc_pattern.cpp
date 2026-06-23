@@ -456,12 +456,12 @@ int FlexPA::getEdgeCost(
                                 curr_acc_point_idx,
                                 max_access_point_size);
 
-  // edge know to be a violation
+  // edge know to have a violation
   if (vio_edges[edge_idx] == 1) {
     return violation_cost;
   }
 
-  // edge not known to be a violation of not
+  // edge not known to have a violation or not
   if (vio_edges[edge_idx] != -1) {
     odb::dbTransform xform = unique_inst->getNoRotationTransform();
     // check DRC
