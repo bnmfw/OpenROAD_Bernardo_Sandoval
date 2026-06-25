@@ -459,14 +459,14 @@ int FlexPA::getEdgeCost(
   // vio_edges caches wether a pair of aps have violations betweem themselves.
   // -1: No cache exists
   // 0: Already cached as no violation
-  // 1: Already caches as having a violation
+  // 1: Already cached as having a violation
 
   // Edge cached as having a violation
   if (vio_edges[edge_idx] == 1) {
     return violation_cost;
   }
 
-  // Violation status of the edge is not cached, has to be calculated
+  // No cache for the violation status of this edge exists
   if (vio_edges[edge_idx] == -1) {
     odb::dbTransform xform = unique_inst->getNoRotationTransform();
     // check DRC
